@@ -1,0 +1,69 @@
+<Project Sdk="Microsoft.NET.Sdk">
+
+  <PropertyGroup>
+	<AllowedOutputExtensionsInPackageBuildOutputFolder>$(AllowedOutputExtensionsInPackageBuildOutputFolder);.pdb</AllowedOutputExtensionsInPackageBuildOutputFolder>
+    <AssemblyVersion>2.0.0.7</AssemblyVersion>
+    <FileVersion>2.0.0.7</FileVersion>
+    <Authors>Nucs / Eli Belash</Authors>
+    <Company>Nucs / Eli Belash</Company>
+	<Summary>Easiest way you'll ever write settings for your app. Cross-platform, modular and still a one-liner.
+Encrypt, Encode and have full control over hardcoded / dynamic settings.</Summary>
+    <GeneratePackageOnBuild>true</GeneratePackageOnBuild>
+    <PackageLicenseUrl>https://github.com/Nucs/JsonSettings/blob/master/LICENSE</PackageLicenseUrl>
+    <PackageProjectUrl>https://github.com/Nucs/JsonSettings</PackageProjectUrl>
+    <PackageIconUrl>https://i.imgur.com/BOExs52.png</PackageIconUrl>
+    <PackageRequireLicenseAcceptance>true</PackageRequireLicenseAcceptance>
+    <Description>Easiest way you'll ever write settings for your app. This library is built to be modular and one-liner exploiting the powerful serialization capabilities of Json.NET out of the box without any mapping necessary to serialize nested custom objects, dictionaries and lists.</Description>
+    <PackageTags>nucs config file newtonsoft settings json configuration preferences</PackageTags>
+    <NeutralLanguage />
+    <SignAssembly>false</SignAssembly>
+    <Copyright>Eli Belash @ 2021</Copyright>
+    <TargetFramework>net48</TargetFramework>
+    <RootNamespace>Nucs.JsonSettings</RootNamespace>
+    <PackageId>Nucs.JsonSettings</PackageId>
+    <PackageVersion>2.0.0-alpha7</PackageVersion>
+    <Title>Nucs.JsonSettings</Title>
+    <PackageReleaseNotes>- Added RecoveryModule  and .WithRecovery to capture parsing errors
+- Added JsonSettings.SuspendAutosave() extension
+- Added proxy construction guard to prevent unncessary allocation on proxy creation.
+- Fix non virtual built-in properties returning null after being wrapped with proxy.
+- Added ProxyGeneratedAttribute that is attached to every proxy-generated class
+- Module: made Dispose() inheritable.
+- Module.Socket: changed to WeakReference&lt;JsonSettings&gt;
+- SettingsBag: added support for SuspendAutosave #26
+- VersioningModule: some internal fixes and renames #19
+- Added RecoveryModule and WithRecovery api. #19
+- JsonSettings: added TryingRecover and Recovered events.
+- JsonSettings: Removed ThrowOnEmptyFile, this is handled by RecoveryModule now
+- Made all module functions and variables protected or virtual.
+- FluentJsonSettings: replaced dynamic creation with hardcoded creation (faster).
+- Added proper Versioning example
+- JsonSettings: add OnXXXX methods that trigger event changed to protected internal.
+- Made all modules extensible
+- SettingsBag: removed locking, optimized and replaced with ConcurrentDictionary for threadsafety
+- Added documentation </PackageReleaseNotes>
+    <LangVersion>9</LangVersion>
+    <Nullable>enable</Nullable>
+    <AllowUnsafeBlocks>true</AllowUnsafeBlocks>
+  </PropertyGroup>
+  <ItemGroup>
+    <Compile Remove="Autosave\**" />
+    <EmbeddedResource Remove="Autosave\**" />
+    <None Remove="Autosave\**" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <PackageReference Include="System.Security.SecureString" Version="4.3.0" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <None Include="..\..\README.md">
+      <Link>README.md</Link>
+    </None>
+  </ItemGroup>
+
+  <ItemGroup>
+    <ProjectReference Include="..\..\..\Newtonsoft.Json\Src\Newtonsoft.Json\Newtonsoft.Json.csproj" />
+  </ItemGroup>
+
+</Project>

@@ -1,0 +1,6 @@
+183e9641897d488a9d093097881c251d78da5aa3		branch 'master' of https://github.com/Nucs/JsonSettings
+31722e6091c06949dd85ecd8a3038e799e62ede8	not-for-merge	branch 'dependabot/nuget/examples/JsonSettings.Examples/Newtonsoft.Json-13.0.1' of https://github.com/Nucs/JsonSettings
+9ef80722b1e9b7abf8edcb67439491e24e25884b	not-for-merge	branch 'dependabot/nuget/src/JsonSettings.Autosave/Newtonsoft.Json-13.0.1' of https://github.com/Nucs/JsonSettings
+a38e052e487ecc2aad8d690d7726bee96e60dd58	not-for-merge	branch 'dependabot/nuget/src/JsonSettings/Newtonsoft.Json-13.0.1' of https://github.com/Nucs/JsonSettings
+d675f55710cb029c1d4af83e552d8a31cd5bb578	not-for-merge	branch 'dependabot/nuget/tests/JsonSettings.Tests.NetStandard/Newtonsoft.Json-13.0.1' of https://github.com/Nucs/JsonSettings
+0e44db30d8844d29f7c0fa3073558ef23749c1e0	not-for-merge	branch 'master-1.xx' of https://github.com/Nucs/JsonSettings

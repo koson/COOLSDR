@@ -1,0 +1,3 @@
+[submodule "PowerSDR-Thetis-G7KLJ"]
+	path = PowerSDR-Thetis-G7KLJ
+	url = https://github.com/sjk7/PowerSDR-Thetis-G7KLJ.git

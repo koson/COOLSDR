@@ -1,0 +1,633 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<Project ToolsVersion="15.0" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
+  <Import Project="$(MSBuildExtensionsPath)\$(MSBuildToolsVersion)\Microsoft.Common.props" Condition="Exists('$(MSBuildExtensionsPath)\$(MSBuildToolsVersion)\Microsoft.Common.props')" />
+  <PropertyGroup>
+    <Configuration Condition=" '$(Configuration)' == '' ">Debug</Configuration>
+    <Platform Condition=" '$(Platform)' == '' ">AnyCPU</Platform>
+    <ProjectGuid>{F085EA85-A129-4A22-92E9-CCF72A6808B9}</ProjectGuid>
+    <OutputType>WinExe</OutputType>
+    <RootNamespace>CoolSDR</RootNamespace>
+    <AssemblyName>CoolSDR</AssemblyName>
+    <TargetFrameworkVersion>v4.8</TargetFrameworkVersion>
+    <FileAlignment>512</FileAlignment>
+    <AutoGenerateBindingRedirects>true</AutoGenerateBindingRedirects>
+    <Deterministic>true</Deterministic>
+    <IsWebBootstrapper>false</IsWebBootstrapper>
+    <PublishUrl>publish\</PublishUrl>
+    <Install>false</Install>
+    <InstallFrom>Disk</InstallFrom>
+    <UpdateEnabled>false</UpdateEnabled>
+    <UpdateMode>Foreground</UpdateMode>
+    <UpdateInterval>7</UpdateInterval>
+    <UpdateIntervalUnits>Days</UpdateIntervalUnits>
+    <UpdatePeriodically>false</UpdatePeriodically>
+    <UpdateRequired>false</UpdateRequired>
+    <MapFileExtensions>true</MapFileExtensions>
+    <ApplicationRevision>6</ApplicationRevision>
+    <ApplicationVersion>0.0.0.%2a</ApplicationVersion>
+    <UseApplicationTrust>false</UseApplicationTrust>
+    <PublishWizardCompleted>true</PublishWizardCompleted>
+    <BootstrapperEnabled>true</BootstrapperEnabled>
+  </PropertyGroup>
+  <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Debug|AnyCPU' ">
+    <PlatformTarget>AnyCPU</PlatformTarget>
+    <DebugSymbols>true</DebugSymbols>
+    <DebugType>full</DebugType>
+    <Optimize>false</Optimize>
+    <OutputPath>bin\Debug\</OutputPath>
+    <DefineConstants>DEBUG;TRACE</DefineConstants>
+    <ErrorReport>prompt</ErrorReport>
+    <WarningLevel>4</WarningLevel>
+    <AllowUnsafeBlocks>true</AllowUnsafeBlocks>
+  </PropertyGroup>
+  <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Release|AnyCPU' ">
+    <PlatformTarget>AnyCPU</PlatformTarget>
+    <DebugType>pdbonly</DebugType>
+    <Optimize>true</Optimize>
+    <OutputPath>bin\Release\</OutputPath>
+    <DefineConstants>TRACE</DefineConstants>
+    <ErrorReport>prompt</ErrorReport>
+    <WarningLevel>4</WarningLevel>
+    <AllowUnsafeBlocks>true</AllowUnsafeBlocks>
+  </PropertyGroup>
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)' == 'Debug|x64'">
+    <DebugSymbols>true</DebugSymbols>
+    <OutputPath>bin\x64\Debug\</OutputPath>
+    <DefineConstants>DEBUG;TRACE</DefineConstants>
+    <DebugType>full</DebugType>
+    <PlatformTarget>x64</PlatformTarget>
+    <LangVersion>7.3</LangVersion>
+    <ErrorReport>prompt</ErrorReport>
+    <Prefer32Bit>true</Prefer32Bit>
+    <AllowUnsafeBlocks>true</AllowUnsafeBlocks>
+  </PropertyGroup>
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)' == 'Release|x64'">
+    <OutputPath>bin\x64\Release\</OutputPath>
+    <DefineConstants>TRACE</DefineConstants>
+    <Optimize>true</Optimize>
+    <DebugType>pdbonly</DebugType>
+    <PlatformTarget>x64</PlatformTarget>
+    <LangVersion>7.3</LangVersion>
+    <ErrorReport>prompt</ErrorReport>
+    <Prefer32Bit>true</Prefer32Bit>
+    <AllowUnsafeBlocks>true</AllowUnsafeBlocks>
+  </PropertyGroup>
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)' == 'Debug|x86'">
+    <DebugSymbols>true</DebugSymbols>
+    <OutputPath>bin\x86\Debug\</OutputPath>
+    <DefineConstants>DEBUG;TRACE</DefineConstants>
+    <DebugType>full</DebugType>
+    <PlatformTarget>x86</PlatformTarget>
+    <LangVersion>7.3</LangVersion>
+    <ErrorReport>prompt</ErrorReport>
+    <Prefer32Bit>true</Prefer32Bit>
+    <AllowUnsafeBlocks>true</AllowUnsafeBlocks>
+  </PropertyGroup>
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)' == 'Release|x86'">
+    <OutputPath>bin\x86\Release\</OutputPath>
+    <DefineConstants>TRACE</DefineConstants>
+    <Optimize>true</Optimize>
+    <DebugType>pdbonly</DebugType>
+    <PlatformTarget>x86</PlatformTarget>
+    <LangVersion>7.3</LangVersion>
+    <ErrorReport>prompt</ErrorReport>
+    <Prefer32Bit>true</Prefer32Bit>
+    <AllowUnsafeBlocks>true</AllowUnsafeBlocks>
+  </PropertyGroup>
+  <PropertyGroup>
+    <StartupObject>CoolSDR.Program</StartupObject>
+  </PropertyGroup>
+  <PropertyGroup>
+    <SignAssembly>false</SignAssembly>
+  </PropertyGroup>
+  <PropertyGroup>
+    <TargetZone>LocalIntranet</TargetZone>
+  </PropertyGroup>
+  <PropertyGroup>
+    <ApplicationManifest>Properties\app.manifest</ApplicationManifest>
+  </PropertyGroup>
+  <ItemGroup>
+    <Reference Include="FontAwesome.Sharp, Version=6.1.1.0, Culture=neutral, PublicKeyToken=d16d1e4e568ec10f, processorArchitecture=MSIL">
+      <HintPath>packages\FontAwesome.Sharp.6.1.1\lib\net48\FontAwesome.Sharp.dll</HintPath>
+    </Reference>
+    <Reference Include="Krypton.Navigator, Version=70.22.11.312, Culture=neutral, PublicKeyToken=a87e673e9ecb6e8e, processorArchitecture=MSIL">
+      <HintPath>packages\Krypton.Navigator.70.22.11.312\lib\net48\Krypton.Navigator.dll</HintPath>
+    </Reference>
+    <Reference Include="Krypton.Ribbon, Version=70.22.11.312, Culture=neutral, PublicKeyToken=a87e673e9ecb6e8e, processorArchitecture=MSIL">
+      <HintPath>packages\Krypton.Ribbon.70.22.11.312\lib\net48\Krypton.Ribbon.dll</HintPath>
+    </Reference>
+    <Reference Include="Krypton.Toolkit, Version=70.22.11.312, Culture=neutral, PublicKeyToken=a87e673e9ecb6e8e, processorArchitecture=MSIL">
+      <HintPath>packages\Krypton.Toolkit.70.22.11.312\lib\net48\Krypton.Toolkit.dll</HintPath>
+    </Reference>
+    <Reference Include="Krypton.Workspace, Version=70.22.11.312, Culture=neutral, PublicKeyToken=a87e673e9ecb6e8e, processorArchitecture=MSIL">
+      <HintPath>packages\Krypton.Workspace.70.22.11.312\lib\net48\Krypton.Workspace.dll</HintPath>
+    </Reference>
+    <Reference Include="Newtonsoft.Json, Version=13.0.0.0, Culture=neutral, PublicKeyToken=30ad4fe6b2a6aeed, processorArchitecture=MSIL">
+      <HintPath>packages\Newtonsoft.Json.13.0.2\lib\net45\Newtonsoft.Json.dll</HintPath>
+    </Reference>
+    <Reference Include="nucs.JsonSettings, Version=1.0.7.0, Culture=neutral, processorArchitecture=MSIL">
+      <HintPath>packages\nucs.JsonSettings.1.0.7\lib\net47\nucs.JsonSettings.dll</HintPath>
+    </Reference>
+    <Reference Include="PresentationCore" />
+    <Reference Include="PresentationFramework" />
+    <Reference Include="SharpDX">
+      <HintPath>PowerSDR-Thetis-G7KLJ\Project Files\lib\SharpDX\SharpDX.dll</HintPath>
+    </Reference>
+    <Reference Include="SharpDX.Desktop">
+      <HintPath>PowerSDR-Thetis-G7KLJ\Project Files\lib\SharpDX\SharpDX.Desktop.dll</HintPath>
+    </Reference>
+    <Reference Include="SharpDX.Direct2D1">
+      <HintPath>PowerSDR-Thetis-G7KLJ\Project Files\lib\SharpDX\SharpDX.Direct2D1.dll</HintPath>
+    </Reference>
+    <Reference Include="SharpDX.Direct3D11">
+      <HintPath>PowerSDR-Thetis-G7KLJ\Project Files\lib\SharpDX\SharpDX.Direct3D11.dll</HintPath>
+    </Reference>
+    <Reference Include="SharpDX.DXGI">
+      <HintPath>PowerSDR-Thetis-G7KLJ\Project Files\lib\SharpDX\SharpDX.DXGI.dll</HintPath>
+    </Reference>
+    <Reference Include="SharpDX.Mathematics">
+      <HintPath>PowerSDR-Thetis-G7KLJ\Project Files\lib\SharpDX\SharpDX.Mathematics.dll</HintPath>
+    </Reference>
+    <Reference Include="SVG, Version=3.3.3.0, Culture=neutral, processorArchitecture=MSIL">
+      <HintPath>packages\SvgNet.3.3.3\lib\net462\SVG.dll</HintPath>
+    </Reference>
+    <Reference Include="System" />
+    <Reference Include="System.Buffers, Version=4.0.3.0, Culture=neutral, PublicKeyToken=cc7b13ffcd2ddd51, processorArchitecture=MSIL">
+      <SpecificVersion>False</SpecificVersion>
+      <HintPath>C:\Program Files\Microsoft Visual Studio\2022\Community\Common7\IDE\PublicAssemblies\System.Buffers.dll</HintPath>
+    </Reference>
+    <Reference Include="System.Configuration" />
+    <Reference Include="System.Core" />
+    <Reference Include="System.Design" />
+    <Reference Include="System.Windows.Forms.DataVisualization" />
+    <Reference Include="System.Xaml" />
+    <Reference Include="System.Xml.Linq" />
+    <Reference Include="System.Data.DataSetExtensions" />
+    <Reference Include="Microsoft.CSharp" />
+    <Reference Include="System.Data" />
+    <Reference Include="System.Deployment" />
+    <Reference Include="System.Drawing" />
+    <Reference Include="System.Net.Http" />
+    <Reference Include="System.Windows.Forms" />
+    <Reference Include="System.Xml" />
+    <Reference Include="WeifenLuo.WinFormsUI.Docking, Version=1.0.0.0, Culture=neutral, PublicKeyToken=5cded1a1a0a7b481, processorArchitecture=MSIL">
+      <HintPath>packages\DockPanelSuite.3.1.0\lib\net40\WeifenLuo.WinFormsUI.Docking.dll</HintPath>
+    </Reference>
+    <Reference Include="WindowsBase" />
+  </ItemGroup>
+  <ItemGroup>
+    <Compile Include="App\App.cs" />
+    <Compile Include="Bands\BandsTypes.cs" />
+    <Compile Include="Bands\BandManagement.cs" />
+    <Compile Include="Bands\Modes.cs" />
+    <Compile Include="Display\DisplaySettings.cs" />
+    <Compile Include="Forms\FrmModePicker.cs">
+      <SubType>Form</SubType>
+    </Compile>
+    <Compile Include="Forms\FrmModePicker.Designer.cs">
+      <DependentUpon>FrmModePicker.cs</DependentUpon>
+    </Compile>
+    <Compile Include="Radio\Filters.cs" />
+    <Compile Include="Radio\NetworkRadio.cs" />
+    <Compile Include="Radio\RadioProtocolImpl.cs" />
+    <Compile Include="Radio\Receiver.cs" />
+    <Compile Include="Radio\Transmitter.cs" />
+    <Compile Include="Utils\ErrorInfo.cs" />
+    <Compile Include="JSON\JSONSettingsBase.cs" />
+    <Compile Include="AppSettings\PortAudioSettings.cs" />
+    <Compile Include="Display\DisplayHelper.cs" />
+    <Compile Include="Win32\DLLCheck.cs" />
+    <Compile Include="AppSettings\FormPosition.cs" />
+    <Compile Include="App\AppSettings.cs" />
+    <Compile Include="Audio\PortAudioHelper.cs" />
+    <Compile Include="App\Program.cs" />
+    <Compile Include="AppSettings\RadioSettings.cs" />
+    <Compile Include="Tuning\Tuning.cs" />
+    <Compile Include="Win32\WinsockManager.cs" />
+    <Compile Include="Bands\ucBands.cs">
+      <SubType>UserControl</SubType>
+    </Compile>
+    <Compile Include="Bands\ucBands.Designer.cs">
+      <DependentUpon>ucBands.cs</DependentUpon>
+    </Compile>
+    <Compile Include="CustomUserControls\UserControl1.cs">
+      <SubType>UserControl</SubType>
+    </Compile>
+    <Compile Include="CustomUserControls\UserControl1.Designer.cs">
+      <DependentUpon>UserControl1.cs</DependentUpon>
+    </Compile>
+    <Compile Include="Forms\FrmBandEdit.cs">
+      <SubType>Form</SubType>
+    </Compile>
+    <Compile Include="Forms\FrmBandEdit.Designer.cs">
+      <DependentUpon>FrmBandEdit.cs</DependentUpon>
+    </Compile>
+    <Compile Include="Forms\frmMain.cs">
+      <SubType>Form</SubType>
+    </Compile>
+    <Compile Include="Forms\frmMain.Designer.cs">
+      <DependentUpon>frmMain.cs</DependentUpon>
+    </Compile>
+    <Compile Include="Forms\frmRadio.cs">
+      <SubType>Form</SubType>
+    </Compile>
+    <Compile Include="Forms\frmRadio.Designer.cs">
+      <DependentUpon>frmRadio.cs</DependentUpon>
+    </Compile>
+    <Compile Include="HPSDR\Alex.cs" />
+    <Compile Include="HPSDR\NetworkIO.cs" />
+    <Compile Include="HPSDR\NetworkIOImports.cs" />
+    <Compile Include="HPSDR\Penny.cs" />
+    <Compile Include="HPSDR\specHPSDR.cs" />
+    <Compile Include="Properties\AssemblyInfo.cs" />
+    <Compile Include="Thetis\AmpView.cs">
+      <SubType>Form</SubType>
+    </Compile>
+    <Compile Include="Thetis\AmpView.Designer.cs" />
+    <Compile Include="Thetis\audio.cs" />
+    <Compile Include="Thetis\Channel.cs" />
+    <Compile Include="Thetis\cmaster.cs" />
+    <Compile Include="Thetis\ColorButton.cs">
+      <SubType>Component</SubType>
+    </Compile>
+    <Compile Include="Thetis\common.cs" />
+    <Compile Include="Thetis\display.cs" />
+    <Compile Include="Thetis\dsp.cs" />
+    <Compile Include="Thetis\enums.cs" />
+    <Compile Include="Thetis\hiperftimer.cs" />
+    <Compile Include="Thetis\Invoke\buttonts.cs">
+      <SubType>Component</SubType>
+    </Compile>
+    <Compile Include="Thetis\Invoke\checkboxts.cs">
+      <SubType>Component</SubType>
+    </Compile>
+    <Compile Include="Thetis\Invoke\comboboxts.cs">
+      <SubType>Component</SubType>
+    </Compile>
+    <Compile Include="Thetis\Invoke\groupboxts.cs">
+      <SubType>Component</SubType>
+    </Compile>
+    <Compile Include="Thetis\Invoke\invoke.cs" />
+    <Compile Include="Thetis\Invoke\labelts.cs">
+      <SubType>Component</SubType>
+    </Compile>
+    <Compile Include="Thetis\Invoke\numericupdownts.cs">
+      <SubType>Component</SubType>
+    </Compile>
+    <Compile Include="Thetis\Invoke\panelts.cs">
+      <SubType>Component</SubType>
+    </Compile>
+    <Compile Include="Thetis\Invoke\radiobuttonts.cs">
+      <SubType>Component</SubType>
+    </Compile>
+    <Compile Include="Thetis\Invoke\textboxts.cs">
+      <SubType>Component</SubType>
+    </Compile>
+    <Compile Include="Thetis\Invoke\trackbarts.cs">
+      <SubType>Component</SubType>
+    </Compile>
+    <Compile Include="Thetis\ivac.cs" />
+    <Compile Include="Thetis\keyboard.cs" />
+    <Compile Include="Thetis\PanDisplay.cs">
+      <SubType>Component</SubType>
+    </Compile>
+    <Compile Include="Thetis\portaudio.cs" />
+    <Compile Include="Thetis\PrettyTrackBar.cs">
+      <SubType>Component</SubType>
+    </Compile>
+    <Compile Include="Thetis\progress.cs">
+      <SubType>Form</SubType>
+    </Compile>
+    <Compile Include="Thetis\PSForm.cs">
+      <SubType>Form</SubType>
+    </Compile>
+    <Compile Include="Thetis\PSForm.designer.cs" />
+    <Compile Include="Radio\RadioBase.cs" />
+    <Compile Include="Thetis\ringbuffer.cs" />
+    <Compile Include="Thetis\rxa.cs">
+      <SubType>Form</SubType>
+    </Compile>
+    <Compile Include="Thetis\rxa.Designer.cs" />
+    <Compile Include="Thetis\rxaControls.cs">
+      <SubType>Form</SubType>
+    </Compile>
+    <Compile Include="Thetis\rxaControls.Designer.cs" />
+    <Compile Include="Thetis\titlebar.cs" />
+    <Compile Include="Thetis\TuneStep.cs" />
+    <Compile Include="Thetis\wave.cs">
+      <SubType>Form</SubType>
+    </Compile>
+    <Compile Include="Thetis\wave_options.cs">
+      <SubType>Form</SubType>
+    </Compile>
+    <Compile Include="Thetis\win32.cs" />
+    <Compile Include="Audio\ucAudio.cs">
+      <SubType>UserControl</SubType>
+    </Compile>
+    <Compile Include="Audio\ucAudio.Designer.cs">
+      <DependentUpon>ucAudio.cs</DependentUpon>
+    </Compile>
+    <Compile Include="CustomUserControls\ucBlank.cs">
+      <SubType>UserControl</SubType>
+    </Compile>
+    <Compile Include="CustomUserControls\ucBlank.Designer.cs">
+      <DependentUpon>ucBlank.cs</DependentUpon>
+    </Compile>
+    <Compile Include="CustomUserControls\ucInfoBar.cs">
+      <SubType>UserControl</SubType>
+    </Compile>
+    <Compile Include="CustomUserControls\ucInfoBar.Designer.cs" />
+    <Compile Include="CustomUserControls\ucRadio.cs">
+      <SubType>UserControl</SubType>
+    </Compile>
+    <Compile Include="CustomUserControls\ucRadio.Designer.cs">
+      <DependentUpon>ucRadio.cs</DependentUpon>
+    </Compile>
+    <Compile Include="Win32\Versions.cs" />
+    <EmbeddedResource Include="Bands\ucBands.resx">
+      <DependentUpon>ucBands.cs</DependentUpon>
+    </EmbeddedResource>
+    <EmbeddedResource Include="CustomUserControls\ucBlank.resx">
+      <DependentUpon>ucBlank.cs</DependentUpon>
+    </EmbeddedResource>
+    <EmbeddedResource Include="Forms\FrmBandEdit.resx">
+      <DependentUpon>FrmBandEdit.cs</DependentUpon>
+    </EmbeddedResource>
+    <EmbeddedResource Include="Forms\frmMain.resx">
+      <DependentUpon>frmMain.cs</DependentUpon>
+    </EmbeddedResource>
+    <EmbeddedResource Include="Forms\FrmModePicker.resx">
+      <DependentUpon>FrmModePicker.cs</DependentUpon>
+    </EmbeddedResource>
+    <EmbeddedResource Include="Forms\frmRadio.resx">
+      <DependentUpon>frmRadio.cs</DependentUpon>
+    </EmbeddedResource>
+    <EmbeddedResource Include="Properties\Resources.resx">
+      <Generator>ResXFileCodeGenerator</Generator>
+      <LastGenOutput>Resources.Designer.cs</LastGenOutput>
+      <SubType>Designer</SubType>
+    </EmbeddedResource>
+    <Compile Include="Properties\Resources.Designer.cs">
+      <AutoGen>True</AutoGen>
+      <DependentUpon>Resources.resx</DependentUpon>
+      <DesignTime>True</DesignTime>
+    </Compile>
+    <EmbeddedResource Include="Thetis\AmpView.resx" />
+    <EmbeddedResource Include="Thetis\ColorButton.resx" />
+    <EmbeddedResource Include="Thetis\Invoke\buttonts.resx" />
+    <EmbeddedResource Include="Thetis\Invoke\labelts.resx" />
+    <EmbeddedResource Include="Thetis\PSForm.resx" />
+    <EmbeddedResource Include="Thetis\rxa.resx" />
+    <EmbeddedResource Include="Thetis\rxaControls.resx" />
+    <EmbeddedResource Include="Thetis\wave.resx" />
+    <EmbeddedResource Include="Thetis\wave_options.resx" />
+    <EmbeddedResource Include="Audio\ucAudio.resx">
+      <DependentUpon>ucAudio.cs</DependentUpon>
+    </EmbeddedResource>
+    <EmbeddedResource Include="CustomUserControls\ucInfoBar.resx" />
+    <EmbeddedResource Include="CustomUserControls\ucRadio.resx">
+      <DependentUpon>ucRadio.cs</DependentUpon>
+    </EmbeddedResource>
+    <None Include="CoolSDR_1_TemporaryKey.pfx" />
+    <None Include="CoolSDR_TemporaryKey.pfx" />
+    <None Include="packages.config" />
+    <None Include="Properties\app.manifest" />
+    <None Include="Properties\Settings.settings">
+      <Generator>SettingsSingleFileGenerator</Generator>
+      <LastGenOutput>Settings.Designer.cs</LastGenOutput>
+    </None>
+    <Compile Include="Properties\Settings.Designer.cs">
+      <AutoGen>True</AutoGen>
+      <DependentUpon>Settings.settings</DependentUpon>
+      <DesignTimeSharedInput>True</DesignTimeSharedInput>
+    </Compile>
+    <None Include="res\digital7.ttf" />
+    <None Include="res\swiss.ttf" />
+    <None Include="res\swissb.ttf" />
+    <None Include="res\swissbi.ttf" />
+    <None Include="res\swissbo.ttf" />
+    <None Include="res\swissc.ttf" />
+    <None Include="res\swisscb.ttf" />
+    <None Include="res\swisscbi.ttf" />
+    <None Include="res\swisscbo.ttf" />
+    <None Include="res\swissci.ttf" />
+    <None Include="res\swissck.ttf" />
+    <None Include="res\swisscki.ttf" />
+    <None Include="res\swisscl.ttf" />
+    <None Include="res\swisscli.ttf" />
+    <None Include="res\swisse.ttf" />
+    <None Include="res\swisseb.ttf" />
+    <None Include="res\swissek.ttf" />
+    <None Include="res\swissel.ttf" />
+    <None Include="res\swissi.ttf" />
+    <None Include="res\swissk.ttf" />
+    <None Include="res\swisski.ttf" />
+    <None Include="res\swissko.ttf" />
+    <None Include="res\swissl.ttf" />
+    <None Include="res\swissli.ttf" />
+  </ItemGroup>
+  <ItemGroup>
+    <None Include="App.config" />
+  </ItemGroup>
+  <ItemGroup>
+    <None Include="res\cpu.png" />
+  </ItemGroup>
+  <ItemGroup>
+    <None Include="res\grab.cur" />
+  </ItemGroup>
+  <ItemGroup>
+    <None Include="res\grabbing.cur" />
+  </ItemGroup>
+  <ItemGroup>
+    <None Include="res\met3.jpg" />
+  </ItemGroup>
+  <ItemGroup>
+    <None Include="res\multifunction.png" />
+  </ItemGroup>
+  <ItemGroup>
+    <None Include="res\openhpsdrnotastall.bmp" />
+  </ItemGroup>
+  <ItemGroup>
+    <None Include="res\openhpsdrnotastall.jpg" />
+  </ItemGroup>
+  <ItemGroup>
+    <None Include="res\openhpsdrnotastall.png" />
+  </ItemGroup>
+  <ItemGroup>
+    <None Include="res\picD1.png" />
+  </ItemGroup>
+  <ItemGroup>
+    <None Include="res\picD1orig.png" />
+  </ItemGroup>
+  <ItemGroup>
+    <None Include="res\picD2.png" />
+  </ItemGroup>
+  <ItemGroup>
+    <None Include="res\play.png" />
+  </ItemGroup>
+  <ItemGroup>
+    <None Include="res\rx_ant3.png" />
+  </ItemGroup>
+  <ItemGroup>
+    <None Include="res\rxant.png" />
+  </ItemGroup>
+  <ItemGroup>
+    <None Include="res\screen.png" />
+  </ItemGroup>
+  <ItemGroup>
+    <None Include="res\screen2.png" />
+  </ItemGroup>
+  <ItemGroup>
+    <None Include="res\screen3.png" />
+  </ItemGroup>
+  <ItemGroup>
+    <None Include="res\screen4.png" />
+  </ItemGroup>
+  <ItemGroup>
+    <None Include="res\s-meter-collins3.png" />
+  </ItemGroup>
+  <ItemGroup>
+    <None Include="res\splashimg.bmp" />
+  </ItemGroup>
+  <ItemGroup>
+    <None Include="res\star.png" />
+  </ItemGroup>
+  <ItemGroup>
+    <None Include="res\sun.png" />
+  </ItemGroup>
+  <ItemGroup>
+    <None Include="res\timer.png" />
+  </ItemGroup>
+  <ItemGroup>
+    <None Include="res\timer_on.png" />
+  </ItemGroup>
+  <ItemGroup>
+    <None Include="res\tx_ant3.png" />
+  </ItemGroup>
+  <ItemGroup>
+    <None Include="res\txant.png" />
+  </ItemGroup>
+  <ItemGroup>
+    <None Include="res\warning4.png" />
+  </ItemGroup>
+  <ItemGroup>
+    <None Include="res\zap.png" />
+  </ItemGroup>
+  <ItemGroup>
+    <None Include="images\clock.jpg" />
+  </ItemGroup>
+  <ItemGroup>
+    <None Include="images\demi144-28frs.jpg" />
+  </ItemGroup>
+  <ItemGroup>
+    <None Include="images\flex-3000.jpg" />
+  </ItemGroup>
+  <ItemGroup>
+    <None Include="images\flex-5000.jpg" />
+  </ItemGroup>
+  <ItemGroup>
+    <None Include="images\hpsdr.jpg" />
+  </ItemGroup>
+  <ItemGroup>
+    <None Include="images\no_hardware.jpg" />
+  </ItemGroup>
+  <ItemGroup>
+    <None Include="images\powersdr_splash_20100618.bmp" />
+  </ItemGroup>
+  <ItemGroup>
+    <None Include="images\powersdr_splash_20110111.bmp" />
+  </ItemGroup>
+  <ItemGroup>
+    <None Include="images\sdr-1000.jpg" />
+  </ItemGroup>
+  <ItemGroup>
+    <None Include="images\sdr-atu.jpg" />
+  </ItemGroup>
+  <ItemGroup>
+    <None Include="images\sdr-pa100.jpg" />
+  </ItemGroup>
+  <ItemGroup>
+    <None Include="images\sdr-rfe.jpg" />
+  </ItemGroup>
+  <ItemGroup>
+    <None Include="images\sdr-usb.jpg" />
+  </ItemGroup>
+  <ItemGroup>
+    <None Include="images\softrock40.jpg" />
+  </ItemGroup>
+  <ItemGroup>
+    <None Include="images\soundcard.jpg" />
+  </ItemGroup>
+  <ItemGroup>
+    <None Include="images\splash.jpg" />
+  </ItemGroup>
+  <ItemGroup>
+    <None Include="images\Wave.png" />
+  </ItemGroup>
+  <ItemGroup>
+    <ProjectReference Include="CoolComponents\CoolComponents.csproj">
+      <Project>{86b47b67-9a97-4313-9177-9234a9b56e9d}</Project>
+      <Name>CoolComponents</Name>
+    </ProjectReference>
+    <ProjectReference Include="MaterialSkin2DotNet\MaterialSkin2DotNet\MaterialSkin2DotNet.csproj">
+      <Project>{25f7fdb0-bc57-48f2-a416-c8bee4489178}</Project>
+      <Name>MaterialSkin2DotNet</Name>
+    </ProjectReference>
+  </ItemGroup>
+  <ItemGroup>
+    <BootstrapperPackage Include=".NETFramework,Version=v4.8">
+      <Visible>False</Visible>
+      <ProductName>Microsoft .NET Framework 4.8 %28x86 and x64%29</ProductName>
+      <Install>true</Install>
+    </BootstrapperPackage>
+    <BootstrapperPackage Include="Microsoft.Net.Framework.3.5.SP1">
+      <Visible>False</Visible>
+      <ProductName>.NET Framework 3.5 SP1</ProductName>
+      <Install>false</Install>
+    </BootstrapperPackage>
+  </ItemGroup>
+  <ItemGroup>
+    <PublishFile Include="bin\x64\Debug\ChannelMaster.dll">
+      <Visible>False</Visible>
+      <Group>
+      </Group>
+      <TargetPath>ChannelMaster.dll</TargetPath>
+      <PublishState>Include</PublishState>
+      <IncludeHash>True</IncludeHash>
+      <FileType>File</FileType>
+    </PublishFile>
+    <PublishFile Include="bin\x64\Debug\libfftw3-3.dll">
+      <Visible>False</Visible>
+      <Group>
+      </Group>
+      <TargetPath>libfftw3-3.dll</TargetPath>
+      <PublishState>Include</PublishState>
+      <IncludeHash>True</IncludeHash>
+      <FileType>File</FileType>
+    </PublishFile>
+    <PublishFile Include="bin\x64\Debug\wdsp.dll">
+      <Visible>False</Visible>
+      <Group>
+      </Group>
+      <TargetPath>wdsp.dll</TargetPath>
+      <PublishState>Include</PublishState>
+      <IncludeHash>True</IncludeHash>
+      <FileType>File</FileType>
+    </PublishFile>
+    <PublishFile Include="CoolComponents">
+      <Visible>False</Visible>
+      <Group>
+      </Group>
+      <TargetPath>
+      </TargetPath>
+      <PublishState>Include</PublishState>
+      <IncludeHash>True</IncludeHash>
+      <FileType>Assembly</FileType>
+    </PublishFile>
+  </ItemGroup>
+  <ItemGroup>
+    <Folder Include="bin\x64\Debug\" />
+    <Folder Include="Class\" />
+  </ItemGroup>
+  <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
+</Project>

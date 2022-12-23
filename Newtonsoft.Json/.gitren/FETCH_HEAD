@@ -1,0 +1,21 @@
+789bfd3bbcd3d5e567bcfb57a1d08fb8611adf96		branch 'master' of https://github.com/JamesNK/Newtonsoft.Json
+946b43fab8c0ff2d9b5ae8599d8b68e36b1e23e0	not-for-merge	branch 'TylerBrinkley-generic-json-converter' of https://github.com/JamesNK/Newtonsoft.Json
+daafdc546ec9b8fdf08660a9136d405fe7764220	not-for-merge	branch 'TylerBrinkley-generic-json-converter-attribute' of https://github.com/JamesNK/Newtonsoft.Json
+6ef8a36bde22f3cd9a2d6909253c6b999cdc6a23	not-for-merge	branch 'jamesnk/date-time-only' of https://github.com/JamesNK/Newtonsoft.Json
+edc5ab69794b47bb65d934588459ed22629e0a69	not-for-merge	branch 'jamesnk/issue2708' of https://github.com/JamesNK/Newtonsoft.Json
+c1c002da067f4ff0d1843c10cca97d279bf7c7b9	not-for-merge	branch 'jamesnk/jsonwriter-depth' of https://github.com/JamesNK/Newtonsoft.Json
+d334dae8cb1027f2b2ec9a93fd8cc4382941e6ad	not-for-merge	branch 'jamesnk/net6-tests' of https://github.com/JamesNK/Newtonsoft.Json
+a6c8847c2051a4a0a2bb1880ae3da5af541ddbb1	not-for-merge	branch 'jamesnk/nullable-error' of https://github.com/JamesNK/Newtonsoft.Json
+d50b2a00f7f70942df35ace7f78a1987cc9183e6	not-for-merge	branch 'jamesnk/nullable-types-attributebug' of https://github.com/JamesNK/Newtonsoft.Json
+876cbe3c4234968d8c81e61d462164d4b2fefbe8	not-for-merge	branch 'json-reader-boxing' of https://github.com/JamesNK/Newtonsoft.Json
+3773eb5be78a112da5d5e5733a3a524684cd606f	not-for-merge	branch 'jsonreader-refactor' of https://github.com/JamesNK/Newtonsoft.Json
+7a74c99f60063a9de90efbe0bc3d64e3d4ef0cd7	not-for-merge	branch 'location-reference-resolver' of https://github.com/JamesNK/Newtonsoft.Json
+509643a8952ce731e0207710c429ad6e67dc43db	not-for-merge	branch 'release/12.0.1' of https://github.com/JamesNK/Newtonsoft.Json
+a7471ae0b96d5a1d1b1d316cd9c8de84ee351258	not-for-merge	branch 'release/12.0.2' of https://github.com/JamesNK/Newtonsoft.Json
+7c3d7f8da7e35dde8fa74188b0decff70f8f10e3	not-for-merge	branch 'release/12.0.3' of https://github.com/JamesNK/Newtonsoft.Json
+ae9fe44e1323e91bcbd185ca1a14099fba7c021f	not-for-merge	branch 'release/13.0.1' of https://github.com/JamesNK/Newtonsoft.Json
+f3dfccfc0c81f58f5a7f8e492b2d6ca1745eda10	not-for-merge	branch 'release/13.0.1-visualstudio-assemblyversion' of https://github.com/JamesNK/Newtonsoft.Json
+789bfd3bbcd3d5e567bcfb57a1d08fb8611adf96	not-for-merge	branch 'release/13.0.2' of https://github.com/JamesNK/Newtonsoft.Json
+d7125908ca0a2cca3c7c0d5d97d449f90bc6dc0e	not-for-merge	branch 'serialization-binder' of https://github.com/JamesNK/Newtonsoft.Json
+d6277bf5d87cdf03174403656e95138675f0344d	not-for-merge	branch 'serializationbinder' of https://github.com/JamesNK/Newtonsoft.Json
+524b9326fc07ee44a0b8566ee199d88a2989af15	not-for-merge	branch 'visualstudio-assemblyversion' of https://github.com/JamesNK/Newtonsoft.Json
