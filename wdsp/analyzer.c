@@ -32,6 +32,10 @@ warren@wpratt.com
 
 */
 
+// FIXME
+#pragma warning(disable : 6385)
+#pragma warning(disable : 6386)
+
 #include "comm.h"
 #include "analyzer.h"
 
@@ -643,7 +647,7 @@ DWORD WINAPI Cspectra(void* pargs) {
         return 0;
     }
 
-    if ((ss >= a->begin_ss) && (ss <= a->end_ss)) {
+    if ((ss >= (uintptr_t)a->begin_ss) && (ss <= (uintptr_t)a->end_ss)) {
         for (i = 0; i < a->size; i++) {
             (a->Cfft_in[ss][LO])[i][0] = a->window[i]
                 * (double)((a->I_samples[ss][LO])[a->IQO_idx[ss][LO]]);
@@ -673,7 +677,8 @@ DWORD WINAPI Cspectra(void* pargs) {
     }
 
     EnterCriticalSection(&(a->EliminateSection[ss]));
-    if ((ss >= a->begin_ss) && (ss <= a->end_ss)) Celiminate(disp, ss, LO);
+    if ((ss >= (uintptr_t)a->begin_ss) && (ss <= (uintptr_t)a->end_ss))
+        Celiminate(disp, ss, LO);
     a->spec_flag[ss] |= 1 << LO;
 
     if (a->spec_flag[ss] == ((1 << a->num_fft) - 1)) {
@@ -1029,7 +1034,7 @@ PORT void XCreateAnalyzer(int disp, int* success, int m_size, int m_num_fft,
     a->max_stitch = m_stitch;
 
     a->pnum_threads = (LONG*)malloc0(sizeof(LONG));
-
+#pragma warning(disable : 6031)
     for (i = 0; i < a->max_stitch; i++)
         for (j = 0; j < a->max_num_fft; j++) {
             a->hSnapEvent[i][j] = CreateEvent(NULL, FALSE, FALSE, TEXT("snap"));
@@ -1215,7 +1220,7 @@ PORT void SetCalibration(int disp,
     DP a = pdisp[disp];
     int i, j;
     int k = 0;
-    double y[dMAX_N][dMAX_M];
+    double y[dMAX_N][dMAX_M] = {0};
 
     qsort(cal, n_points, (dMAX_M + 1) * sizeof(double), calcompare);
 
@@ -1475,3 +1480,7 @@ PORT void SetDisplayNormOneHz(int disp, int pixout, int norm) {
         LeaveCriticalSection(&a->ResampleSection);
     }
 }
+
+// FIXME
+#pragma warning(default : 6385)
+#pragma warning(default : 6386)

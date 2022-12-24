@@ -3857,7 +3857,7 @@ static HRESULT CreateAudioClient(PaWasapiStream* pStream,
     /*/
 
     hr = IAudioClient_Initialize(audioClient, AUDCLNT_SHAREMODE_SHARED,
-        AUDCLNT_STREAMFLAGS_LOOPBACK, 0, 0, &pSub->wavex.Format, 0);
+        pSub->streamFlags, 0, 0, &pSub->wavex, 0);
 
     // [Output only] Check if buffer size is the one we requested in Exclusive
     // mode, for UAC1 USB DACs WASAPI can allocate internal buffer equal to 8
@@ -3954,13 +3954,15 @@ static HRESULT CreateAudioClient(PaWasapiStream* pStream,
         _CalculatePeriodicity(pSub, output, &eventPeriodicity);
 
         // Open the stream and associate it with an audio session
-        /*/
+
         hr = IAudioClient_Initialize(audioClient, pSub->shareMode,
             pSub->streamFlags, pSub->period, eventPeriodicity,
             &pSub->wavex.Format, NULL);
-            /*/
+
+        /*/
         hr = IAudioClient_Initialize(audioClient, AUDCLNT_SHAREMODE_SHARED,
             AUDCLNT_STREAMFLAGS_LOOPBACK, 0, 0, &pSub->wavex.Format, 0);
+            /*/
     }
 
     /*! WASAPI buffer size or alignment failure. Fallback to using default size

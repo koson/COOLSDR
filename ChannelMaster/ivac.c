@@ -258,11 +258,13 @@ PORT int StartAudioIVAC(int id) {
         a->host_api_index, a->output_dev_index);
 
     if (in_dev < 0) {
-        sprintf(errorBuf, "Input device API index is bad. Given HostApiIndex was: %ld\n", a->input_dev_index);
+        sprintf(errorBuf,
+            "Input device API index is bad. Given HostApiIndex was: %ld\n",
+            a->input_dev_index);
         return -1;
     }
     if (out_dev < 0) {
-    
+
         sprintf(errorBuf,
             "Output device API index is bad. Given HostApiIndex was: %ld\n",
             a->output_dev_index);
@@ -495,7 +497,7 @@ PORT int SetIVACinputDEVindex(int id, int index) {
         return -1;
     }
 
-   int in_dev = Pa_HostApiDeviceIndexToDeviceIndex(a->host_api_index, index);
+    int in_dev = Pa_HostApiDeviceIndexToDeviceIndex(a->host_api_index, index);
 
     if (in_dev < 0) {
         sprintf(errorBuf,
@@ -523,12 +525,10 @@ PORT int SetIVACoutputDEVindex(int id, int index) {
             a->input_dev_index);
         return out_dev;
     }
- 
 
     a->output_dev_index = index;
     return 0;
 }
-
 
 PORT void SetIVACnumChannels(int id, int n) {
     IVAC a = pvac[id];

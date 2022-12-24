@@ -200,10 +200,18 @@ void SetCMRingOutsize(int id, int size) {
     // make sure the thread has finished, KLJ
     int slept = 0;
     volatile int tid = GetThreadId(a->hCMThread);
+    volatile int tid_local = tid;
     while (a->hCMThread != 0) {
         Sleep(1);
         slept++;
-        if (slept > 2000) break;
+        tid_local = GetThreadId(a->hCMThread);
+        if (tid_local == 0 || (LONG_PTR)tid_local == INVALID_HANDLE_VALUE) {
+            if (a->hCMThread) {
+                assert(0);
+                // break;
+            }
+        }
+        if (slept > 1000) break;
     }
     //////////////////////////////////////////////////////////////////////////
     // KLJ this was just Sleep(2)m not actually waiting for the thread to exit
