@@ -29,6 +29,7 @@
 #include <string.h>
 #include <stdint.h>
 #include <strsafe.h>
+#include <obbuffs.h>
 
 int SeqError = 0;
 int out_control_idx = 0;
@@ -179,7 +180,7 @@ volatile DWORD time_when_start = 0;
 #endif
 
 int MetisReadDirectPOLL(unsigned char* bufp) {
-// #define BUF_SZ_METIS 1074
+
 #define BUF_SZ_METIS 2048
     struct indgram {
         unsigned char readbuf[BUF_SZ_METIS];
@@ -193,9 +194,7 @@ int MetisReadDirectPOLL(unsigned char* bufp) {
     int fromlen = sizeof(fromaddr);
 
     int rc = 0;
-    unsigned int endpoint = 0;
-    unsigned int seqnum = 0;
-    unsigned char* seqbytep = (unsigned char*)&seqnum;
+
 
     DWORD startEnter = timeGetTime();
     DWORD done = startEnter;
@@ -204,35 +203,24 @@ int MetisReadDirectPOLL(unsigned char* bufp) {
     int yields = 0;
     (void)yields;
 
-#ifdef RIO_SOCK_USEDD
-    WSABUF buf;
-
-    buf.buf = (char*)&inpacket;
-    buf.len = sizeof(inpacket);
-
-    DWORD bytesRecvd = 0;
-    DWORD flags = 0;
-#else
+    int total = 0;
     char* buf = (char*)&inpacket;
     int buflen = sizeof(inpacket);
-#endif
 
+    DWORD time_last_got_data = timeGetTime();
+    volatile DWORD since_got_data = 0;
     int errNum = 0;
     int err = 0;
     int len = sizeof(len);
     DWORD time_last_slept = timeGetTime();
+    #define EXPECTED_FRAME_SIZE 1032
 
     // trying a tight loop to see if it helps relay chatter
-    while (io_keep_running && rc != 1032) {
-#ifndef RIO_SOCK_USEDD // nah, WSA.. blocks
+    while (io_keep_running && total < EXPECTED_FRAME_SIZE) {
+
         rc = recvfrom(listenSock, (char*)buf, buflen, 0,
             (struct sockaddr*)&fromaddr, &fromlen);
-#else
-        rc = WSARecv(listenSock, &buf, 1, &bytesRecvd, &flags, 0, 0);
-        if (rc == 0) {
-            rc = bytesRecvd;
-        }
-#endif
+
 
         if (rc < 0) {
             if (rc == -1) // SOCKET_ERROR
@@ -258,6 +246,8 @@ int MetisReadDirectPOLL(unsigned char* bufp) {
                         }
 
                         yields++;
+                        
+                        since_got_data  = timeGetTime() - time_last_got_data;
                     }
                     continue;
                 } else {
@@ -270,20 +260,23 @@ int MetisReadDirectPOLL(unsigned char* bufp) {
 
             return rc;
         } else if (rc > 0) {
-#ifdef RIO_SOCK_USEDD
-            buf.buf += rc;
-            buf.len -= rc;
-#else
+
+            time_last_got_data = timeGetTime();
+            total += rc;
             buf += rc;
             buflen -= rc;
-#endif
             loops = 0;
             done = timeGetTime();
         }
     }
 
+
+        unsigned int endpoint = 0;
+    unsigned int seqnum = 0;
+    unsigned char* seqbytep = (unsigned char*)&seqnum;
+
     /* check frame is from who we expect */
-    if (rc == 1032) { /* looks like a data frame */
+    if (total == EXPECTED_FRAME_SIZE) { /* looks like a data frame */
         if ((inpacket.readbuf[0] == 0xef) && (inpacket.readbuf[1] == 0xfe)
             && (inpacket.readbuf[2] == 0x01)) {
             endpoint = (unsigned int)inpacket.readbuf[3];
@@ -346,7 +339,9 @@ int MetisReadDirectPOLL(unsigned char* bufp) {
             printf("MRD: ignoring right sized frame bad header! %d\n", rc);
         }
     } else {
-        printf("MRD: ignoring short frame size=%d\n", rc);
+        if (io_keep_running) {
+            printf("MRD: ignoring short frame size=%d\n", rc);
+        }
     }
 
     // LeaveCriticalSection(&prn->rcvpktp1);
@@ -508,6 +503,9 @@ DWORD WINAPI MetisReadThreadMain(LPVOID n) {
         prioritise_thread_cleanup(hpri);
     }
     IOThreadRunning = 0;
+    CloseHandle(prn->hReadThreadInitSem);
+    prn->hReadThreadInitSem = 0;
+    prn->hReadThreadMain = 0;
     return 0;
 }
 
@@ -566,7 +564,8 @@ void MetisReadThreadMainLoop(void) {
                     prn->wsaProcessEvents.iErrorCode[FD_READ_BIT]);
                 break;
             }
-            MetisReadDirect(FPGAReadBufp);
+        }
+            MetisReadDirect(FPGAReadBufp, 30000);
 #else
         MetisReadDirectPOLL(FPGAReadBufp);
 
@@ -1000,41 +999,31 @@ void MetisReadThreadMainLoop(void) {
             DWORD dwWait
                 = WaitForMultipleObjects(2, prn->hsendEventHandles, TRUE, 3000);
 
+
             if (dwWait == WAIT_TIMEOUT) {
 
                 HaveSync = 0; // send console LOS -- at least let the console
                               // have a way to check
-                /*/
-                SendStopToMetis();
-                memset(prn->RxReadBufp, 0, prn->rx[0].spp);
-                memset(prn->TxReadBufp, 0, prn->mic.spp);
+                /*/ when P2 fails, it does this (but we just let the app know if
+                he polls HaveSync) SendStopToMetis(); memset(prn->RxReadBufp, 0,
+                prn->rx[0].spp); memset(prn->TxReadBufp, 0, prn->mic.spp);
                 Inbound(inid(0, 0), prn->rx[0].spp, prn->RxReadBufp);
                 Inbound(inid(0, 1), prn->rx[1].spp, prn->RxReadBufp);
                 Inbound(inid(1, 0), prn->mic.spp, prn->TxReadBufp);
                 /*/
-
                 continue;
+            } else {
+                HaveSync = TRUE;
             }
-#ifdef KLJ_DEBUG_TAKES_AGES
-            DWORD waited = dw2 - dw1;
-            if (waited > 10) {
 
-                volatile DWORD since_signalled
-                    = timeGetTime() - prn->last_time_signalled;
-                printf("waited ages for send event handles: %d ms. Was "
-                       "signalled %d ms ago.\n",
-                    (int)waited, (int)since_signalled);
-            }
-#endif
+            for (i = 0; i < 4 * 63;
+                 i += 2) // swap L & R audio; firmware bug fix
             {
-                for (i = 0; i < 4 * 63;
-                     i += 2) // swap L & R audio; firmware bug fix
-                {
-                    swap = pbuffs[0][i + 0];
-                    pbuffs[0][i + 0] = pbuffs[0][i + 1];
-                    pbuffs[0][i + 1] = swap;
-                }
+                swap = pbuffs[0][i + 0];
+                pbuffs[0][i + 0] = pbuffs[0][i + 1];
+                pbuffs[0][i + 1] = swap;
             }
+
             for (i = 0; i < 2 * 63;
                  i++) // for each sample from both sets, 8 bytes per
                 for (j = 0; j < 2;
@@ -1062,5 +1051,33 @@ void MetisReadThreadMainLoop(void) {
             prioritise_thread_cleanup(hpri);
         }
 
+        // DO NOT do this here as we wait on the thread dying event to assure it
+        // has gone away:
+        // prn->hWriteThreadMain = 0;
+
         return 0;
+    }
+
+    void stop_ob_thread(OBB a) {
+
+        InterlockedBitTestAndReset(&a->accept, 0);
+        EnterCriticalSection(&a->csIN);
+        EnterCriticalSection(&a->csOUT);
+        // Sleep(25);
+        InterlockedBitTestAndReset(&a->run, 0);
+        ReleaseSemaphore(a->Sem_BuffReady, 1, 0);
+        LeaveCriticalSection(&a->csOUT);
+        ReleaseSemaphore(prn->hobbuffsRun[0], 1, 0);
+        ReleaseSemaphore(prn->hobbuffsRun[1], 1, 0);
+        int slept = 0;
+        while (a->ThreadHandle) {
+            Sleep(1);
+            slept++;
+            if (slept > 10000) {
+                assert(0);
+                break;
+            }
+        }
+        printf("Took %ld ms to stop_ob_thread(), with id %ld\n", slept, a->id);
+        fflush(stdout);
     }

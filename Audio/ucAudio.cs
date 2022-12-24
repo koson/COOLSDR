@@ -94,7 +94,7 @@ namespace CoolSDR.CustomUserControls
 
         public bool Exclusive
         {
-            get => chkExclusive.Enabled;
+            get => chkExclusive.Checked;
         }
 
 
@@ -366,11 +366,11 @@ namespace CoolSDR.CustomUserControls
         {
             get
             {
+                
                 int index = cboAudioIn.SelectedIndex;
                 if (index < 0) index = 0;
-                string api_name = cboAPI.SelectedItem.ToString();
-                var devs = PortAudioHelper.DevicesIn(api_name);
-                return devs[index];
+                PaDeviceInfoEx dev = (PaDeviceInfoEx)cboAudioIn.Items[cboAudioIn.SelectedIndex];
+                return dev;
             }
         }
 
@@ -409,23 +409,11 @@ namespace CoolSDR.CustomUserControls
                 int index = cboAudioOut.SelectedIndex;
                 if (index < 0) index = 0;
                 string api_name = cboAPI.SelectedItem.ToString();
-
-                var devs = PortAudioHelper.DevicesOut(api_name);
-                Debug.Assert(devs != null && devs.Count > 0);
-                return devs[index];
+                return (PaDeviceInfoEx)cboAudioOut.SelectedItem;
             }
         }
 
-        // returns the one selected in the UI, not the saved one.
-        public int InputDeviceIndexCurrent
-        {
-            get => cboAudioIn.SelectedIndex;
-        }
-        // returns the one selected in the UI, not the saved one.
-        public int OutputDeviceIndexCurrent
-        {
-            get => cboAudioOut.SelectedIndex;
-        }
+
 
         // returns the saved one, not the one selected in the UI
         public int APIIndex
@@ -440,7 +428,12 @@ namespace CoolSDR.CustomUserControls
         // returns the one selected in the UI, not the saved one.
         public int APIIndexCurrent
         {
-            get => cboAPI.SelectedIndex;
+            get
+            {
+                Debug.Assert(cboAPI.SelectedItem != null);
+                PaHostAPIInfoEx info = (PaHostAPIInfoEx)cboAPI.SelectedItem;
+                return info.Index;
+            }
         }
 
         // returns the one selected in the UI, not the saved one.
@@ -575,9 +568,11 @@ namespace CoolSDR.CustomUserControls
             }
             catch (Exception e)
             {
+                console.VACEnabled = false;
                 ok = false;
                 MessageBox.Show("Testing devices failed. Please review the information carefully \n\n"
                     + e.ToString(), App.Name);
+                ivac.StopAudioIVAC(0);
             }
             finally
             {
@@ -591,13 +586,13 @@ namespace CoolSDR.CustomUserControls
                     {
                         this.CollectAudioSettings();
                     }
+
+                    console.VACEnabled = was_running;
+                    Common.Console.PowerOn = was_running;
+                    
                 }
 
-                if (was_running)
-                {
-                    console.VACEnabled = was_vac;
-                    Common.Console.PowerOn = true;
-                }
+
             }
         }
     }

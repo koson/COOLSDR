@@ -34,6 +34,8 @@ warren@wpratt.com
 #include "pa_win_wasapi.h"
 #include "pa_win_wdmks.h"
 
+volatile int nThreadsMMCount = 0;
+
 __declspec(align(16)) IVAC pvac[MAX_EXT_VACS];
 
 void create_resamps(IVAC a) {
@@ -93,6 +95,7 @@ PORT void create_ivac(int id, int run,
     a->INfvar = 1.0;
     a->OUTforce = 0;
     a->OUTfvar = 1.0;
+    a->host_api_index = -1;
     create_resamps(a);
     {
         int inrate[2] = {a->audio_rate, a->txmon_rate};
@@ -202,7 +205,7 @@ int make_ivac_thread_max_priority(IVAC a) {
         } else {
 
             a->have_set_thread_priority = 0;
-            assert("Unable to prioritise audio thread" == 0);
+            // assert("Unable to prioritise audio thread" == 0);
             return 0;
         }
     }
@@ -222,7 +225,11 @@ int CallbackIVAC(const void* input, void* output, unsigned long frameCount,
     (void)timeInfo;
     (void)statusFlags;
 
-    if (!a->run) return 0;
+    if (!a->run) {
+        memset(in_ptr, 0, sizeof(double) * frameCount * a->num_channels);
+        memset(out_ptr, 0, sizeof(double) * frameCount * a->num_channels);
+        return 0;
+    }
     xrmatchIN(a->rmatchIN, in_ptr); // MIC data from VAC
     xrmatchOUT(a->rmatchOUT, out_ptr); // audio or I-Q data to VAC
 
@@ -240,6 +247,8 @@ PORT PaStreamInfo GetStreamIVAC(int id) {
     return info;
 }
 
+char errorBuf[1024];
+
 PORT int StartAudioIVAC(int id) {
     IVAC a = pvac[id];
     int error = 0;
@@ -247,6 +256,18 @@ PORT int StartAudioIVAC(int id) {
         a->host_api_index, a->input_dev_index);
     int out_dev = Pa_HostApiDeviceIndexToDeviceIndex(
         a->host_api_index, a->output_dev_index);
+
+    if (in_dev < 0) {
+        sprintf(errorBuf, "Input device API index is bad. Given HostApiIndex was: %ld\n", a->input_dev_index);
+        return -1;
+    }
+    if (out_dev < 0) {
+    
+        sprintf(errorBuf,
+            "Output device API index is bad. Given HostApiIndex was: %ld\n",
+            a->output_dev_index);
+        return -2;
+    }
 
     a->inParam.device = in_dev;
     a->inParam.channelCount = 2;
@@ -460,20 +481,54 @@ void SetIVACtxmonSize(int id, int size) {
     a->txmon_size = (unsigned int)size;
 }
 
-PORT void SetIVAChostAPIindex(int id, int index) {
+PORT int SetIVAChostAPIindex(int id, int index) {
     IVAC a = pvac[id];
     a->host_api_index = index;
+    return 0;
 }
 
-PORT void SetIVACinputDEVindex(int id, int index) {
+PORT int SetIVACinputDEVindex(int id, int index) {
     IVAC a = pvac[id];
+    if (a->host_api_index < 0) {
+        sprintf(errorBuf,
+            "You must set the host API before setting an input device");
+        return -1;
+    }
+
+   int in_dev = Pa_HostApiDeviceIndexToDeviceIndex(a->host_api_index, index);
+
+    if (in_dev < 0) {
+        sprintf(errorBuf,
+            "Input device API index is bad. Given HostApiIndex was: %ld\n",
+            a->input_dev_index);
+        return in_dev;
+    }
     a->input_dev_index = index;
+    return 0;
 }
 
-PORT void SetIVACoutputDEVindex(int id, int index) {
+PORT int SetIVACoutputDEVindex(int id, int index) {
     IVAC a = pvac[id];
+    if (a->host_api_index < 0) {
+        sprintf(errorBuf,
+            "You must set the host API before setting an output device");
+        return -1;
+    }
+
+    int out_dev = Pa_HostApiDeviceIndexToDeviceIndex(a->host_api_index, index);
+
+    if (out_dev < 0) {
+        sprintf(errorBuf,
+            "Input device API index is bad. Given HostApiIndex was: %ld\n",
+            a->input_dev_index);
+        return out_dev;
+    }
+ 
+
     a->output_dev_index = index;
+    return 0;
 }
+
 
 PORT void SetIVACnumChannels(int id, int n) {
     IVAC a = pvac[id];
@@ -607,6 +662,10 @@ PORT void SetIVACbypass(int id, int bypass) {
 PORT void SetIVACcombine(int id, int combine) {
     IVAC a = pvac[id];
     a->vac_combine_input = combine;
+}
+
+PORT const char* GetLastErrorInfo(void) {
+    return errorBuf;
 }
 
 void combinebuff(int n, double* a, double* combined) {

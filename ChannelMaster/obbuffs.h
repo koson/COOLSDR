@@ -30,12 +30,14 @@ warren@wpratt.com
 #include <math.h>
 #include <time.h>
 #include <avrt.h>
+#include <assert.h>
 #include "cmUtilities.h"
 
 typedef double WDSP_COMPLEX[2];
 #ifndef PORT
 #define PORT __declspec(dllexport)
 #endif
+
 
 #define numRings (16)
 #define obMAXSIZE (360)
@@ -68,13 +70,14 @@ typedef struct _obb {
     CRITICAL_SECTION csIN; // used to block input while parameters are updated
                            // or buffers flushed
     double* out;
+    volatile HANDLE ThreadHandle; // KLJ: clean up threads properly
 } obb, *OBB;
 
-extern void create_obbuffs(int id, int accept, int max_insize, int outsize);
 
-extern void destroy_obbuffs(int id);
 
-extern void flush_obbuffs(int id);
+void flush_obbuffs(int id);
+void destroy_all_obbuffs(void);
+void create_obbuffs(int id, int accept, int max_insize, int outsize);
 
 extern __declspec(dllexport) void OutBound(int id, int nsamples, double* in);
 
@@ -86,5 +89,8 @@ extern void ob_main(void* pargs);
 extern void SetOBRingOutsize(int id, int size);
 
 extern void sendOutbound(int id, double* out);
+
+void stop_ob_thread(OBB a);
+
 
 #endif

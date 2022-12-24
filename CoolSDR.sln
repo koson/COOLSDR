@@ -15,11 +15,14 @@ Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "MaterialSkin2DotNet", "Mate
 EndProject
 Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "ChannelMaster", "ChannelMaster\ChannelMaster.vcxproj", "{8E5759EA-1D4E-46DA-9B3C-3577A98301C1}"
 EndProject
-Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "PortAudioForCoolSDR", "lib\portaudio\build\msvc\portaudio.vcxproj", "{0A18A071-125E-442F-AFF7-A3F68ABECF99}"
-EndProject
 Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "wdsp", "wdsp\wdsp.vcxproj", "{6DBDF457-8E84-4DFF-B1E4-A9177D15D89F}"
+	ProjectSection(ProjectDependencies) = postProject
+		{0A18A071-125E-442F-AFF7-A3F68ABECF99} = {0A18A071-125E-442F-AFF7-A3F68ABECF99}
+	EndProjectSection
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "CoolComponents", "CoolComponents\CoolComponents.csproj", "{86B47B67-9A97-4313-9177-9234A9B56E9D}"
+EndProject
+Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "PortAudioForCoolSDR", "lib\portaudio\build\msvc\portaudio.vcxproj", "{0A18A071-125E-442F-AFF7-A3F68ABECF99}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
@@ -109,30 +112,6 @@ Global
 		{8E5759EA-1D4E-46DA-9B3C-3577A98301C1}.ReleaseMinDependency|x64.Build.0 = Release|x64
 		{8E5759EA-1D4E-46DA-9B3C-3577A98301C1}.ReleaseMinDependency|x86.ActiveCfg = Release|Win32
 		{8E5759EA-1D4E-46DA-9B3C-3577A98301C1}.ReleaseMinDependency|x86.Build.0 = Release|Win32
-		{0A18A071-125E-442F-AFF7-A3F68ABECF99}.Debug|Any CPU.ActiveCfg = Debug|x64
-		{0A18A071-125E-442F-AFF7-A3F68ABECF99}.Debug|Any CPU.Build.0 = Debug|x64
-		{0A18A071-125E-442F-AFF7-A3F68ABECF99}.Debug|ARM64.ActiveCfg = Debug|ARM64
-		{0A18A071-125E-442F-AFF7-A3F68ABECF99}.Debug|ARM64.Build.0 = Debug|ARM64
-		{0A18A071-125E-442F-AFF7-A3F68ABECF99}.Debug|x64.ActiveCfg = Debug|x64
-		{0A18A071-125E-442F-AFF7-A3F68ABECF99}.Debug|x64.Build.0 = Debug|x64
-		{0A18A071-125E-442F-AFF7-A3F68ABECF99}.Debug|x86.ActiveCfg = Debug|Win32
-		{0A18A071-125E-442F-AFF7-A3F68ABECF99}.Debug|x86.Build.0 = Debug|Win32
-		{0A18A071-125E-442F-AFF7-A3F68ABECF99}.Release|Any CPU.ActiveCfg = Release|x64
-		{0A18A071-125E-442F-AFF7-A3F68ABECF99}.Release|Any CPU.Build.0 = Release|x64
-		{0A18A071-125E-442F-AFF7-A3F68ABECF99}.Release|ARM64.ActiveCfg = Release|ARM64
-		{0A18A071-125E-442F-AFF7-A3F68ABECF99}.Release|ARM64.Build.0 = Release|ARM64
-		{0A18A071-125E-442F-AFF7-A3F68ABECF99}.Release|x64.ActiveCfg = Release|x64
-		{0A18A071-125E-442F-AFF7-A3F68ABECF99}.Release|x64.Build.0 = Release|x64
-		{0A18A071-125E-442F-AFF7-A3F68ABECF99}.Release|x86.ActiveCfg = Release|Win32
-		{0A18A071-125E-442F-AFF7-A3F68ABECF99}.Release|x86.Build.0 = Release|Win32
-		{0A18A071-125E-442F-AFF7-A3F68ABECF99}.ReleaseMinDependency|Any CPU.ActiveCfg = ReleaseMinDependency|x64
-		{0A18A071-125E-442F-AFF7-A3F68ABECF99}.ReleaseMinDependency|Any CPU.Build.0 = ReleaseMinDependency|x64
-		{0A18A071-125E-442F-AFF7-A3F68ABECF99}.ReleaseMinDependency|ARM64.ActiveCfg = ReleaseMinDependency|ARM64
-		{0A18A071-125E-442F-AFF7-A3F68ABECF99}.ReleaseMinDependency|ARM64.Build.0 = ReleaseMinDependency|ARM64
-		{0A18A071-125E-442F-AFF7-A3F68ABECF99}.ReleaseMinDependency|x64.ActiveCfg = ReleaseMinDependency|x64
-		{0A18A071-125E-442F-AFF7-A3F68ABECF99}.ReleaseMinDependency|x64.Build.0 = ReleaseMinDependency|x64
-		{0A18A071-125E-442F-AFF7-A3F68ABECF99}.ReleaseMinDependency|x86.ActiveCfg = ReleaseMinDependency|Win32
-		{0A18A071-125E-442F-AFF7-A3F68ABECF99}.ReleaseMinDependency|x86.Build.0 = ReleaseMinDependency|Win32
 		{6DBDF457-8E84-4DFF-B1E4-A9177D15D89F}.Debug|Any CPU.ActiveCfg = Debug|x64
 		{6DBDF457-8E84-4DFF-B1E4-A9177D15D89F}.Debug|Any CPU.Build.0 = Debug|x64
 		{6DBDF457-8E84-4DFF-B1E4-A9177D15D89F}.Debug|ARM64.ActiveCfg = Debug|ARM64
@@ -181,6 +160,30 @@ Global
 		{86B47B67-9A97-4313-9177-9234A9B56E9D}.ReleaseMinDependency|x64.Build.0 = Release|Any CPU
 		{86B47B67-9A97-4313-9177-9234A9B56E9D}.ReleaseMinDependency|x86.ActiveCfg = Release|Any CPU
 		{86B47B67-9A97-4313-9177-9234A9B56E9D}.ReleaseMinDependency|x86.Build.0 = Release|Any CPU
+		{0A18A071-125E-442F-AFF7-A3F68ABECF99}.Debug|Any CPU.ActiveCfg = Debug|x64
+		{0A18A071-125E-442F-AFF7-A3F68ABECF99}.Debug|Any CPU.Build.0 = Debug|x64
+		{0A18A071-125E-442F-AFF7-A3F68ABECF99}.Debug|ARM64.ActiveCfg = Debug|ARM64
+		{0A18A071-125E-442F-AFF7-A3F68ABECF99}.Debug|ARM64.Build.0 = Debug|ARM64
+		{0A18A071-125E-442F-AFF7-A3F68ABECF99}.Debug|x64.ActiveCfg = Debug|x64
+		{0A18A071-125E-442F-AFF7-A3F68ABECF99}.Debug|x64.Build.0 = Debug|x64
+		{0A18A071-125E-442F-AFF7-A3F68ABECF99}.Debug|x86.ActiveCfg = Debug|Win32
+		{0A18A071-125E-442F-AFF7-A3F68ABECF99}.Debug|x86.Build.0 = Debug|Win32
+		{0A18A071-125E-442F-AFF7-A3F68ABECF99}.Release|Any CPU.ActiveCfg = Release|x64
+		{0A18A071-125E-442F-AFF7-A3F68ABECF99}.Release|Any CPU.Build.0 = Release|x64
+		{0A18A071-125E-442F-AFF7-A3F68ABECF99}.Release|ARM64.ActiveCfg = Release|ARM64
+		{0A18A071-125E-442F-AFF7-A3F68ABECF99}.Release|ARM64.Build.0 = Release|ARM64
+		{0A18A071-125E-442F-AFF7-A3F68ABECF99}.Release|x64.ActiveCfg = Release|x64
+		{0A18A071-125E-442F-AFF7-A3F68ABECF99}.Release|x64.Build.0 = Release|x64
+		{0A18A071-125E-442F-AFF7-A3F68ABECF99}.Release|x86.ActiveCfg = Release|Win32
+		{0A18A071-125E-442F-AFF7-A3F68ABECF99}.Release|x86.Build.0 = Release|Win32
+		{0A18A071-125E-442F-AFF7-A3F68ABECF99}.ReleaseMinDependency|Any CPU.ActiveCfg = ReleaseMinDependency|x64
+		{0A18A071-125E-442F-AFF7-A3F68ABECF99}.ReleaseMinDependency|Any CPU.Build.0 = ReleaseMinDependency|x64
+		{0A18A071-125E-442F-AFF7-A3F68ABECF99}.ReleaseMinDependency|ARM64.ActiveCfg = ReleaseMinDependency|ARM64
+		{0A18A071-125E-442F-AFF7-A3F68ABECF99}.ReleaseMinDependency|ARM64.Build.0 = ReleaseMinDependency|ARM64
+		{0A18A071-125E-442F-AFF7-A3F68ABECF99}.ReleaseMinDependency|x64.ActiveCfg = ReleaseMinDependency|x64
+		{0A18A071-125E-442F-AFF7-A3F68ABECF99}.ReleaseMinDependency|x64.Build.0 = ReleaseMinDependency|x64
+		{0A18A071-125E-442F-AFF7-A3F68ABECF99}.ReleaseMinDependency|x86.ActiveCfg = ReleaseMinDependency|Win32
+		{0A18A071-125E-442F-AFF7-A3F68ABECF99}.ReleaseMinDependency|x86.Build.0 = ReleaseMinDependency|Win32
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE

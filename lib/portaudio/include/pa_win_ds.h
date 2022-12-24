@@ -47,30 +47,31 @@
 #include "pa_win_waveformat.h"
 
 #ifdef __cplusplus
-extern "C" {
+extern "C"
+{
 #endif /* __cplusplus */
 
-#define paWinDirectSoundUseLowLevelLatencyParameters (0x01)
-#define paWinDirectSoundUseChannelMask (0x04)
 
-typedef struct PaWinDirectSoundStreamInfo {
-    unsigned long size; /**< sizeof(PaWinDirectSoundStreamInfo) */
-    PaHostApiTypeId hostApiType; /**< paDirectSound */
-    unsigned long version; /**< 2 */
+#define paWinDirectSoundUseLowLevelLatencyParameters            (0x01)
+#define paWinDirectSoundUseChannelMask                          (0x04)
 
-    unsigned long flags; /**< enable other features of this struct */
+
+typedef struct PaWinDirectSoundStreamInfo{
+    unsigned long size;             /**< sizeof(PaWinDirectSoundStreamInfo) */
+    PaHostApiTypeId hostApiType;    /**< paDirectSound */
+    unsigned long version;          /**< 2 */
+
+    unsigned long flags;            /**< enable other features of this struct */
 
     /**
        low-level latency setting support
        Sets the size of the DirectSound host buffer.
        When flags contains the paWinDirectSoundUseLowLevelLatencyParameters
        this size will be used instead of interpreting the generic latency
-       parameters to Pa_OpenStream(). If the flag is not set this value is
-       ignored.
+       parameters to Pa_OpenStream(). If the flag is not set this value is ignored.
 
        If the stream is a full duplex stream the implementation requires that
-       the values of framesPerBuffer for input and output match (if both are
-       specified).
+       the values of framesPerBuffer for input and output match (if both are specified).
     */
     unsigned long framesPerBuffer;
 
@@ -83,7 +84,9 @@ typedef struct PaWinDirectSoundStreamInfo {
     */
     PaWinWaveFormatChannelMask channelMask;
 
-} PaWinDirectSoundStreamInfo;
+}PaWinDirectSoundStreamInfo;
+
+
 
 #ifdef __cplusplus
 }

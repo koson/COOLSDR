@@ -133,6 +133,8 @@ static inline void show_windows_error(const char* where, DWORD e) {
 #endif
 }
 
+extern volatile  int nThreadsMMCount;
+
 static inline HANDLE prioritise_thread_max() {
 
     DWORD taskIndex = 0;
@@ -152,10 +154,15 @@ static inline HANDLE prioritise_thread_max() {
 
     HANDLE hTask = AvSetMmThreadCharacteristics(TEXT("Pro Audio"), &taskIndex);
     if (hTask == 0) {
-        show_windows_error(
-            "hTask returned zero from AvSetMmThreadCharacteristics",
-            GetLastError());
-        assert("hTask returned zero from AvSetMmThreadCharacteristics" == 0);
+        if (!GetLastError == 1552) {
+
+            show_windows_error(
+                "hTask returned zero from AvSetMmThreadCharacteristics",
+                GetLastError());
+            assert(
+                "hTask returned zero from AvSetMmThreadCharacteristics" == 0);
+            return 0;
+        }
         return 0;
     }
 
@@ -163,6 +170,7 @@ static inline HANDLE prioritise_thread_max() {
 
         ok = AvSetMmThreadPriority(hTask, AVRT_PRIORITY_CRITICAL);
         assert(ok);
+        nThreadsMMCount++;
     }
 
     if (!ok) {
@@ -178,8 +186,6 @@ static inline HANDLE prioritise_thread_max() {
 static inline BOOL prioritise_thread_cleanup(HANDLE h) {
 
     if (h == 0 || h == INVALID_HANDLE_VALUE) {
-        assert("Why are we reverting MMThread characteristics on a bad handle?"
-            == 0);
         return FALSE;
     }
     BOOL ret = AvRevertMmThreadCharacteristics(h);
@@ -189,6 +195,8 @@ static inline BOOL prioritise_thread_cleanup(HANDLE h) {
         fprintf(stderr,
             "Failed to clean up thread priority, with error code: %ld\n",
             (int)dw);
+    } else {
+        nThreadsMMCount--;
     }
 
     return ret;

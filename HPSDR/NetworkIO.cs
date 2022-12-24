@@ -301,6 +301,7 @@ namespace Thetis
                             if (m2 != null)
                             {
                                 hpsdrd.Add(m2);
+                                goto ActuallyConnect;
                             }
                             else
                             {
@@ -374,6 +375,8 @@ namespace Thetis
                     }
                 }
             }
+
+            ActuallyConnect:
             if (foundRadio) LastError = null;
             if (LastError != null)
             {
@@ -701,7 +704,7 @@ namespace Thetis
             bool radio_found = false;            // true when we find a radio
             bool static_ip_ok = true;
             int time_out = 0;
-            const int TIME_OUT = 10;
+            const int TIME_OUT = 50;
 
             // set socket option so that broadcast is allowed.
             socket.SetSocketOption(SocketOptionLevel.Socket, SocketOptionName.Broadcast, 1);
@@ -724,9 +727,9 @@ namespace Thetis
             }
 
             // send every second until we either find a radio or exceed the number of attempts
-            // Note: we may find more than one radio!
+            // Note: we may find more than one radio! -- we have a collection: hpsdrdList
             int attempts = 0;
-            while (!radio_found && time_out <= TIME_OUT)
+            while (!radio_found && time_out <= TIME_OUT) 
             {
                 attempts++;
                 // send a broadcast to port 1024
@@ -832,6 +835,7 @@ namespace Thetis
                             else if (MAC.Equals("00-00-00-00-00-00"))
                             {
                                 Common.LogString("Rejected: contains bogus MAC address of all-zeroes");
+
                             }
                             else
                             {

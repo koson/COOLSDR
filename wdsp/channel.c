@@ -31,6 +31,8 @@ warren@wpratt.com
 
 #include "comm.h"
 
+
+
 struct _ch ch[MAX_CHANNELS];
 
 void start_thread(int channel) {
@@ -268,7 +270,7 @@ PORT int SetChannelState(int channel, int state, int dmode) {
                         count++;
                     }
                 }
-                if (waited >= timeout) {
+                if (waited >= (DWORD)timeout) {
                     InterlockedBitTestAndReset(&ch[channel].exchange, 0);
                     InterlockedBitTestAndReset(&ch[channel].flushflag, 0);
                     InterlockedBitTestAndReset(&a->slew.downflag, 0);

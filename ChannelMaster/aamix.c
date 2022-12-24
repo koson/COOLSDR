@@ -174,6 +174,7 @@ void mix_main(void* pargs) {
     if (hpri && hpri != INVALID_HANDLE_VALUE) {
         prioritise_thread_cleanup(hpri);
     }
+    a->ThreadHandle = 0;
 }
 
 // G7KLJ:
@@ -183,7 +184,7 @@ void mix_main_proxy(void* pargs) {
 }
 
 void start_mixthread(AAMIX a) {
-    _beginthread(mix_main_proxy, 0, (void*)a);
+    a->ThreadHandle = (HANDLE)_beginthread(mix_main_proxy, 0, (void*)a);
 }
 
 enum _slew { BEGIN = 0, DELAYUP, UPSLEW, ON, DELAYDOWN, DOWNSLEW, ZERO, OFF };
@@ -328,7 +329,16 @@ void destroy_aamix(void* ptr, int id) {
         a = (AAMIX)ptr;
     InterlockedBitTestAndReset(&a->run, 0);
     for (i = 0; i < a->ninputs; i++) ReleaseSemaphore(a->Ready[i], 1, 0);
-    Sleep(2);
+    
+    int slept = 0;
+    while (a->ThreadHandle) {
+        Sleep(1);
+        ++slept;
+        if (slept >= 10000) {
+            assert(0);
+            break;
+        }
+    }
     DeleteCriticalSection(&a->cs_out);
     for (i = 0; i < a->ninputs; i++) {
         destroy_resample(a->rsmp[i]);

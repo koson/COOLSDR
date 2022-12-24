@@ -31,6 +31,21 @@
 #define MDECAY 0.99f;
 const int numInputBuffs = 12;
 
+
+void CreateP1Handles() { // KLJ
+
+    if (prn->hsendEventHandles[0]
+        == 0) { // KLJ: If one needs creating, I assume they all do.
+
+        prn->hsendEventHandles[0]
+            = (prn->hsendLRSem = CreateSemaphore(NULL, 0, 64, NULL));
+        prn->hsendEventHandles[1]
+            = (prn->hsendIQSem = CreateSemaphore(NULL, 0, 64, NULL));
+        prn->hobbuffsRun[0] = CreateSemaphore(NULL, 0, 1, NULL);
+        prn->hobbuffsRun[1] = CreateSemaphore(NULL, 0, 1, NULL);
+    }
+}
+
 PORT int StartAudioNative() {
     int myrc = 0;
     int rc;
@@ -70,16 +85,11 @@ PORT int StartAudioNative() {
                 // oof! I have caught this running more than one of these!
                 assert(prn->hWriteThreadMain == INVALID_HANDLE_VALUE
                     || prn->hWriteThreadMain == 0);
+                
                 prn->hWriteThreadMain = (HANDLE)_beginthreadex(
                     NULL, 0, sendProtocol1Samples, 0, 0, NULL);
 
-                // Create Events
-                prn->hsendEventHandles[0]
-                    = (prn->hsendLRSem = CreateSemaphore(NULL, 0, 64, NULL));
-                prn->hsendEventHandles[1]
-                    = (prn->hsendIQSem = CreateSemaphore(NULL, 0, 64, NULL));
-                prn->hobbuffsRun[0] = CreateSemaphore(NULL, 0, 1, NULL);
-                prn->hobbuffsRun[1] = CreateSemaphore(NULL, 0, 1, NULL);
+                // CreateP1Handles();
             }
 
         } while (0);
@@ -116,6 +126,10 @@ PORT void StopAudio() {
     fflush(stdout);
 
     StopReadThread();
+ 
+
+    destroy_all_obbuffs();
+   
 }
 
 int getDDPTTcount = 0;
@@ -928,7 +942,8 @@ PORT void LRAudioSwap(int swap) {
 
 PORT void create_rnet() {
     int i = 0;
-
+    assert(prn == 0); // you want to RE-create the radio? no!
+    if (prn) return;
     prn = (RADIONET)malloc(sizeof(radionet));
     if (prn) {
         prn->RxBuff = (double**)calloc(8, sizeof(double*));
@@ -936,6 +951,13 @@ PORT void create_rnet() {
         for (int i = 0; i < 8; i++) {
             prn->RxBuff[i] = (double*)calloc(64, 2 * sizeof(double));
         }
+
+        prn->hsendEventHandles[0] = 0;
+        prn->hsendEventHandles[1] = 0;
+        prn->hobbuffsRun[0] = 0;
+        prn->hobbuffsRun[1] = 0;
+        CreateP1Handles();
+
         prn->RxReadBufp = (double*)calloc(1, 2 * sizeof(double) * 240);
         prn->TxReadBufp = (double*)calloc(1, 2 * sizeof(double) * 720);
         prn->ReadBufp = (unsigned char*)calloc(1, sizeof(unsigned char) * 1444);
@@ -1070,6 +1092,7 @@ PORT void create_rnet() {
         (void)InitializeCriticalSectionAndSpinCount(&prn->sndpkt, 2500);
         //(void)InitializeCriticalSectionAndSpinCount(&prn->rcvpktp1, 2500);
         (void)InitializeCriticalSectionAndSpinCount(&prn->seqErrors, 0);
+        
 
         SendpOutbound(OutBound);
     } else {
@@ -1116,8 +1139,10 @@ PORT void destroy_rnet() {
     free(prn);
     _aligned_free(prbpfilter);
     _aligned_free(prbpfilter2);
-    destroy_obbuffs(0);
-    destroy_obbuffs(1);
+
+    // KLJ: These threads were getting in a right tangle.
+    // We should really destroy them here.
+    destroy_all_obbuffs();
 }
 
 void PrintTimeHack() {

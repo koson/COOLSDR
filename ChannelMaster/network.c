@@ -1239,6 +1239,29 @@ void KeepAliveLoop(void) {
 
 static const double const_1_div_8388608_ = 1.0 / 8388608.0;
 
+void DestroyP1Handles() { // KLJ
+
+    if (RadioProtocol == USB) {
+        if (prn->hsendIQSem) {
+
+            CloseHandle(prn->hsendIQSem);
+            prn->hsendIQSem = 0;
+        }
+
+        if (prn->hsendLRSem) {
+            CloseHandle(prn->hsendLRSem);
+            prn->hsendLRSem = 0;
+        }
+
+        for (int i = 0; i < 2; i++) {
+            if (prn->hobbuffsRun[i]) {
+                CloseHandle(prn->hobbuffsRun[i]);
+                prn->hobbuffsRun[i] = 0;
+            }
+        };
+    }
+}
+
 // stops and kills the IOThread
 int IOThreadStop() {
     if (io_keep_running == 0) { // not running
@@ -1246,36 +1269,38 @@ int IOThreadStop() {
     }
     io_keep_running = 0; // flag to stop
 
-    int tid = GetThreadId(prn->hReadThreadMain);
-    (void)tid;
     SetEvent(prn->hDataEvent); // make sure main thread can wake up. Fixes
                                // deadlock when app closed.
-    DWORD dwWait = WaitForSingleObject(prn->hReadThreadMain, 30000);
+    DWORD d1 = timeGetTime();
+    DWORD dwWait = WaitForSingleObject(prn->hReadThreadMain, 3000);
     if (dwWait == WAIT_TIMEOUT) {
         // meh, at least you didnt lock up forever
         fprintf(stderr, "IOThreadStop() forcing closure.\n");
         assert(0);
     }
-    CloseHandle(prn->hReadThreadMain);
+    DWORD d2 = timeGetTime();
+    printf("Took %ld ms to IOThreadStop()\n", (int)(d2-d1));
+    fflush(stdout);
+    prn->hReadThreadMain = 0;
+    // ^^ ^^ ^^
+    // another runner can now check there's only one thread doing the p1 sending
+    // the next time it runs.
+    ReleaseSemaphore(prn->hsendLRSem, 1, 0);
+    dwWait = WaitForSingleObject(prn->hWriteThreadMain, 3000);
+    assert(dwWait != WAIT_TIMEOUT);
     prn->hWriteThreadMain = 0;
-    CloseHandle(prn->hReadThreadInitSem);
-    prn->hReadThreadInitSem = 0;
-    CloseHandle(prn->hWriteThreadMain);
-    prn->hWriteThreadMain = 0;
-    CloseHandle(prn->hWriteThreadInitSem);
-    prn->hWriteThreadInitSem = 0;
+  
 
-    // Protocol 1 handles
-    if (RadioProtocol == USB) {
-        CloseHandle(prn->hsendIQSem);
-        prn->hsendIQSem = 0;
-        CloseHandle(prn->hsendLRSem);
-        prn->hsendLRSem = 0;
-        CloseHandle(prn->hobbuffsRun[0]);
-        prn->hobbuffsRun[0] = 0;
-        CloseHandle(prn->hobbuffsRun[1]);
-        prn->hobbuffsRun[1] = 0;
-    }
+
+
+
+    // KLJ:
+    // do NOT DestroyP1 handles here --
+    // It leads to UB if
+    // ob_main is waiting on these handles. (and he tends to be,
+    // after the first startup. It would be better to make them
+    // when the radio is made, and destroy them when it is destroyed.
+    // Or, we could stop the ob_mains here if we could find a handle to them ...
 
     return EXIT_SUCCESS;
 }

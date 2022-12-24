@@ -6681,74 +6681,68 @@ namespace Thetis
             //     else
             //         Display.ResetWaterfallBmp(2);
             // }
-            try
+
+            int H = displayTargetHeight;
+            if (current_display_mode == DisplayMode.PANAFALL) H /= 2;
+            if (rx2_enabled) H /= 2;
+
+            // override for splitter pos, when only one rx and it is panafall
+            if (!rx2_enabled && current_display_mode == DisplayMode.PANAFALL)
+                H = displayTargetHeight - PanafallSplitBarPos;
+
+            if (current_display_engine == DisplayEngine.GDI_PLUS)
             {
-                int H = displayTargetHeight;
-                if (current_display_mode == DisplayMode.PANAFALL) H /= 2;
-                if (rx2_enabled) H /= 2;
-
-                // override for splitter pos, when only one rx and it is panafall
-                if (!rx2_enabled && current_display_mode == DisplayMode.PANAFALL)
-                    H = displayTargetHeight - PanafallSplitBarPos;
-
-                if (current_display_engine == DisplayEngine.GDI_PLUS)
+                if (waterfall_bmp != null) waterfall_bmp.Dispose();
+                waterfall_bmp = new Bitmap(displayTargetWidth,
+                    /*(displayTargetHeight / scale)*/ H - 20,
+                    PixelFormat.Format24bppRgb);
+            }
+            else
+            {
+                lock (m_objDX2Lock)
                 {
-                    if (waterfall_bmp != null) waterfall_bmp.Dispose();
-                    waterfall_bmp = new Bitmap(displayTargetWidth,
-                        /*(displayTargetHeight / scale)*/ H - 20,
-                        PixelFormat.Format24bppRgb);
-                }
-                else
-                {
-                    lock (m_objDX2Lock)
+                    SharpDX.Direct2D1.Bitmap tmp = null;
+                    if (waterfall_bmp_dx2d != null
+                        && !waterfall_bmp_dx2d.IsDisposed)
                     {
-                        SharpDX.Direct2D1.Bitmap tmp = null;
-                        if (waterfall_bmp_dx2d != null
-                            && !waterfall_bmp_dx2d.IsDisposed)
+                        if (displayTargetWidth == waterfall_bmp_dx2d.Size.Width)
                         {
-                            if (displayTargetWidth == waterfall_bmp_dx2d.Size.Width)
-                            {
-                                // make copy only if widths equal
-                                tmp = new SharpDX.Direct2D1.Bitmap(d2dRenderTarget,
-                                    new Size2((int)waterfall_bmp_dx2d.Size.Width,
-                                        (int)waterfall_bmp_dx2d.Size.Height),
-                                    new BitmapProperties(
-                                        new SDXPixelFormat(Format.B8G8R8A8_UNorm,
-                                            AlphaMode.Premultiplied)));
+                            // make copy only if widths equal
+                            tmp = new SharpDX.Direct2D1.Bitmap(d2dRenderTarget,
+                                new Size2((int)waterfall_bmp_dx2d.Size.Width,
+                                    (int)waterfall_bmp_dx2d.Size.Height),
+                                new BitmapProperties(
+                                    new SDXPixelFormat(Format.B8G8R8A8_UNorm,
+                                        AlphaMode.Premultiplied)));
 
-                                tmp.CopyFromBitmap(waterfall_bmp_dx2d,
-                                    new SharpDX.Point(0, 0),
-                                    new SharpDX.Rectangle(0, 0, (int)tmp.Size.Width,
-                                        (int)tmp.Size.Height));
-                                //
-                            }
-                        }
-
-                        if (waterfall_bmp_dx2d != null) waterfall_bmp_dx2d.Dispose();
-                        if (d2dRenderTarget != null)
-                        {
-                            waterfall_bmp_dx2d
-                                = new SharpDX.Direct2D1.Bitmap(d2dRenderTarget,
-                                    new Size2(displayTargetWidth,
-                                        /*(displayTargetHeight / scale)*/ H - 20),
-                                    new BitmapProperties(new SDXPixelFormat(
-                                        Format.B8G8R8A8_UNorm, AlphaMode.Premultiplied)));
-                        }
-
-                        if (tmp != null)
-                        {
-                            // copy old waterfall into new bitmap
-                            waterfall_bmp_dx2d.CopyFromBitmap(tmp,
-                                new SharpDX.Point(
-                                    0, 0)); // anything outside will be 'ignored'
-                            tmp.Dispose();
+                            tmp.CopyFromBitmap(waterfall_bmp_dx2d,
+                                new SharpDX.Point(0, 0),
+                                new SharpDX.Rectangle(0, 0, (int)tmp.Size.Width,
+                                    (int)tmp.Size.Height));
+                            //
                         }
                     }
-                }
-            }
-            catch (Exception e)
-            {
 
+                    if (waterfall_bmp_dx2d != null) waterfall_bmp_dx2d.Dispose();
+                    if (d2dRenderTarget != null)
+                    {
+                        waterfall_bmp_dx2d
+                            = new SharpDX.Direct2D1.Bitmap(d2dRenderTarget,
+                                new Size2(displayTargetWidth,
+                                    /*(displayTargetHeight / scale)*/ H - 20),
+                                new BitmapProperties(new SDXPixelFormat(
+                                    Format.B8G8R8A8_UNorm, AlphaMode.Premultiplied)));
+                    }
+
+                    if (tmp != null)
+                    {
+                        // copy old waterfall into new bitmap
+                        waterfall_bmp_dx2d.CopyFromBitmap(tmp,
+                            new SharpDX.Point(
+                                0, 0)); // anything outside will be 'ignored'
+                        tmp.Dispose();
+                    }
+                }
             }
         }
 

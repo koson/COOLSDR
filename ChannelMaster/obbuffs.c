@@ -37,10 +37,47 @@ struct _obpointers {
     OBB pdbuff[numRings];
     OBB pebuff[numRings];
     OBB pfbuff[numRings];
+    volatile int nThreads;
+    volatile HANDLE Threads[numRings];
 } obp;
 
-void start_obthread(int id) {
-    _beginthread(ob_main, 0, (void*)id);
+
+
+void destroy_obbuffs(int id) {
+    OBB a = obp.pcbuff[id];
+
+    if (obp.Threads[id] == 0) {
+        return;
+    }
+    stop_ob_thread(a);
+
+    DeleteCriticalSection(&a->csOUT);
+    DeleteCriticalSection(&a->csIN);
+    CloseHandle(a->Sem_BuffReady);
+    free(a->out);
+    free(a->r1_baseptr);
+    free(a);
+    obp.nThreads--;
+    assert(obp.nThreads >= 0);
+    obp.Threads[id] = 0;
+}
+
+void destroy_all_obbuffs() {
+
+    const int n = obp.nThreads;
+    for (int i = 0; i < n; i++) {
+        destroy_obbuffs(i);
+    }
+    assert(obp.nThreads == 0);
+
+
+}
+
+void start_obthread(int id, OBB a) {
+    HANDLE h = (HANDLE)_beginthread(ob_main, 0, (void*)(ptrdiff_t)id);
+    a->ThreadHandle = h;
+    obp.Threads[obp.nThreads] = h;
+    obp.nThreads++;
 }
 
 void create_obbuffs(int id, int accept, int max_insize, int outsize) {
@@ -74,27 +111,10 @@ void create_obbuffs(int id, int accept, int max_insize, int outsize) {
     InitializeCriticalSectionAndSpinCount(&a->csIN, 2500);
     InitializeCriticalSectionAndSpinCount(&a->csOUT, 2500);
     a->out = (double*)calloc(obMAXSIZE, sizeof(WDSP_COMPLEX));
-    start_obthread(id);
+    start_obthread(id, a);
 }
 
-void destroy_obbuffs(int id) {
-    OBB a = obp.pcbuff[id];
-    if (obp.pcbuff[0] == NULL) return;
-    InterlockedBitTestAndReset(&a->accept, 0);
-    EnterCriticalSection(&a->csIN);
-    EnterCriticalSection(&a->csOUT);
-    Sleep(25);
-    InterlockedBitTestAndReset(&a->run, 0);
-    ReleaseSemaphore(a->Sem_BuffReady, 1, 0);
-    LeaveCriticalSection(&a->csOUT);
-    Sleep(2);
-    DeleteCriticalSection(&a->csOUT);
-    DeleteCriticalSection(&a->csIN);
-    CloseHandle(a->Sem_BuffReady);
-    free(a->out);
-    free(a->r1_baseptr);
-    free(a);
-}
+
 
 void flush_obbuffs(int id) {
     OBB a = obp.pfbuff[id];
@@ -205,22 +225,19 @@ void ob_main(void* pargs) {
     if (hpri && hpri != INVALID_HANDLE_VALUE) {
         prioritise_thread_cleanup(hpri);
     }
+    a->ThreadHandle = 0;
 }
 
+
 void SetOBRingOutsize(int id, int size) {
+    
     OBB a = obp.pcbuff[id];
-    InterlockedBitTestAndReset(&a->accept, 0);
-    EnterCriticalSection(&a->csIN);
-    EnterCriticalSection(&a->csOUT);
-    Sleep(25);
-    InterlockedBitTestAndReset(&a->run, 0);
-    ReleaseSemaphore(a->Sem_BuffReady, 1, 0);
-    LeaveCriticalSection(&a->csOUT);
-    Sleep(2);
+    stop_ob_thread(a);
+    
     flush_obbuffs(id);
     a->r1_outsize = size;
     InterlockedBitTestAndSet(&a->run, 0);
-    start_obthread(id);
+    start_obthread(id, a);
     LeaveCriticalSection(&a->csIN);
     InterlockedBitTestAndSet(&a->accept, 0);
 }

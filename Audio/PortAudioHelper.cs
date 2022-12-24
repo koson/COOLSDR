@@ -184,21 +184,18 @@ namespace CoolSDR.Class
 
             if (!useCachedValues)
             {
-
                 m_apis.Clear();
                 int ctr = 0;
                 foreach (var a in hosts)
                 {
                     PaHostApiInfo info = (PaHostApiInfo)a;
-                    m_apis.Add(new PaHostAPIInfoEx(info, ctr++));
-                }
 
 
-                foreach (var a in hosts)
-                {
                     var hostName = a.name;
                     var indevs = Audio.GetPAInputDevices(host_index);
                     var outdevs = Audio.GetPAOutputDevices(host_index);
+                    m_apis.Add(new PaHostAPIInfoEx(info, ctr++, ref indevs, ref outdevs));
+
                     if (indevs.Count > 0 || outdevs.Count > 0)
                     {
 
@@ -276,9 +273,9 @@ namespace CoolSDR.Class
         private static int SelectComboItem(ref ComboType cbo, string what, int default_index = 0)
         {
             int index = 0;
-            foreach (string s in cbo.Items)
+            foreach (var thing in cbo.Items)
             {
-                if (s == what)
+                if (thing.ToString() == what)
                 {
                     cbo.SelectedIndex = index;
                     cbo.Refresh();
@@ -297,7 +294,7 @@ namespace CoolSDR.Class
             cbo.Items.Clear();
             foreach (PaDeviceInfoEx device in devs)
             {
-                cbo.Items.Add(device.Name);
+                cbo.Items.Add(device);
             }
             return cbo.Items.Count;
         }
@@ -470,21 +467,22 @@ namespace CoolSDR.Class
             int found = -1;
             int idx = 0;
 
-            // using m_DevicesOut here because we may not have any input devices,
-            // eg remote desktop.
             if (m_devicesOut == null || m_devicesOut.Count == 0)
             {
-                Common.LogString("No output devices detected on machine. Application Exiting", true);
+                Common.ExitApp("No output devices detected on machine. Application Exiting.", -77);
             }
-            foreach (var key in m_devicesOut.Keys)
+
+            foreach (var api in m_apis)
             {
-                cboAPI.Items.Add(key);
-                if (!string.IsNullOrEmpty(apiName) && key == apiName)
+                if (api.OutputDevices.Count > 0 && api.InputDevices.Count > 0)
                 {
-                    found = idx;
+                    cboAPI.Items.Add(api);
+                    if (!string.IsNullOrEmpty(apiName) && api.Name == apiName)
+                    {
+                        found = idx;
+                    }
                 }
                 idx++;
-
             }
 
             if (found < 0)
@@ -507,11 +505,11 @@ namespace CoolSDR.Class
 
             foreach (var d in indevs)
             {
-                cboIn.Items.Add(d.Name); // note: You can add the actual devices here if u want. I chose not to.
+                cboIn.Items.Add(d);
             }
             foreach (var d in outdevs)
             {
-                cboOut.Items.Add(d.Name);
+                cboOut.Items.Add(d);
             }
         }
 

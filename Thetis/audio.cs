@@ -437,10 +437,14 @@ namespace Thetis
                 vac_enabled = value;
                 cmaster.CMSetTXAPanelGain1(WDSP.id(1, 0));
                 cmaster.CMSetAntiVoxSourceWhat();
-                Audio.SampleRate2 = console.UCAudio.Settings.SampleRate;
+                Audio.SampleRate2 = console.UCAudio.SampleRateCurrent;
                 if (console.PowerOn)
                 {
                     EnableVAC1(value);
+                }
+                else
+                {
+                    EnableVAC1(false);
                 }
 
 
@@ -1047,20 +1051,41 @@ namespace Thetis
                 this.Name = info.name;
                 this.Index = PADeviceIndex;
             }
+            public override string ToString()
+            {
+                return Name;
+            }
         }
 
         public class PaHostAPIInfoEx
         {
             public readonly PaHostApiInfo Info;
+            public List<PaDeviceInfoEx> InputDevices
+            {
+                get;
+                private set;
+            }
+            public List<PaDeviceInfoEx> OutputDevices
+            {
+                get;
+                private set;
+            }
             public int Index { get; private set; }
             public string Name
             {
                 get { return Info.name; }
             }
-            internal PaHostAPIInfoEx(PaHostApiInfo info, int APIIndex)
+            internal PaHostAPIInfoEx(PaHostApiInfo info, int APIIndex, ref List<PaDeviceInfoEx> indevs, ref List<PaDeviceInfoEx> outdevs)
             {
                 this.Info = info;
                 this.Index = APIIndex;
+                this.InputDevices= indevs;
+                this.OutputDevices = outdevs;
+            }
+
+            public override string ToString()
+            {
+                return Info.name;
             }
         }
 
@@ -1068,9 +1093,9 @@ namespace Thetis
         {
             var a = new List<PaDeviceInfoEx>();
             PortAudioForCoolSDR.PaHostApiInfo hostInfo = PortAudioForCoolSDR.PA_GetHostApiInfo(hostIndex);
+            
             for (int i = 0; i < hostInfo.deviceCount; i++)
             {
-
                 int devIndex = PortAudioForCoolSDR.PA_HostApiDeviceIndexToDeviceIndex(hostIndex, i);
                 PortAudioForCoolSDR.PaDeviceInfo devInfo = PortAudioForCoolSDR.PA_GetDeviceInfo(devIndex);
                 if (devInfo.maxInputChannels > 0)
@@ -1244,8 +1269,7 @@ namespace Thetis
             if (enable)
                 unsafe
                 {
-                    Status[0].state = true;
-                    Status[0].status = "";
+
                     int num_chan = 1;
                     int sample_rate, block_size;
                     PaDeviceInfoEx indevinfo;
@@ -1303,14 +1327,36 @@ namespace Thetis
                     }
                     else if (vac_stereo) num_chan = 2;
                     VACRBReset = true;
-
+                    string serror;
                     if (testing)
                         ivac.SetIVAChostAPIindex(0, console.UCAudio.APIIndexCurrent);
                     else
                         ivac.SetIVAChostAPIindex(0, console.UCAudio.APIIndex);
 
-                    ivac.SetIVACinputDEVindex(0, indevinfo.Index);
-                    ivac.SetIVACoutputDEVindex(0, outdevinfo.Index);
+                    try
+                    {
+                        var err = ivac.SetIVACinputDEVindex(0, indevinfo.Index);
+                        if (err != 0)
+                        {
+                            serror = Thetis.ivac.IVACGetErrorText();
+                            Debug.Assert(!String.IsNullOrEmpty(serror));
+                            Status[0].state = false;
+                            Status[0].status = serror;
+                            throw new Exception(serror);
+                        }
+                        err = ivac.SetIVACoutputDEVindex(0, outdevinfo.Index);
+                        if (err != 0)
+                        {
+                            serror = Thetis.ivac.IVACGetErrorText();
+                            Debug.Assert(!String.IsNullOrEmpty(serror));
+                            Status[0].state = false;
+                            Status[0].status = serror;
+                            throw new Exception(serror);
+                        }
+                    }catch(Exception exc)
+                    {
+                        throw exc;
+                    }
                     ivac.SetIVACnumChannels(0, num_chan);
                     ivac.SetIVACInLatency(0, in_latency, 0);
                     ivac.SetIVACOutLatency(0, out_latency, 0);
@@ -1350,6 +1396,10 @@ namespace Thetis
                         if (vac_run)
                         {
                             ivac.SetIVACrun(0, 1);
+                            // running here
+                            Status[0].state = true;
+                            Status[0].status = "";
+
                         }
                         else
                         {
@@ -1360,7 +1410,7 @@ namespace Thetis
                     }
                     catch (Exception e)
                     {
-                        Common.LogException(e, true, "Error starting audio");
+                        Common.LogException(e, !testing, "Error starting audio");
                         if ((PaErrorCode)return_value != PaErrorCode.paNoError)
                         {
                             pa_msg = "\n\nFailed to start VAC. Audio subsystem reports: " +
@@ -1377,6 +1427,10 @@ namespace Thetis
                         }
                         Status[0].status = pa_msg;
                         Status[0].state = false;
+                        if (testing)
+                        {
+                            throw e;
+                        }
 
                         MessageBox.Show("The program is having trouble starting the VAC audio streams.\n" +
                             "Please examine the VAC related settings on the Audio Settings Tab and try again." + pa_msg,

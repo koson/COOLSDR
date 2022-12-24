@@ -32,7 +32,8 @@ warren@wpratt.com
 #include "cmcomm.h"
 
 void start_cmthread(int id) {
-    _beginthread(cm_main, 0, (void*)id);
+    CMB a = pcm->pcbuff[id];
+    a->hCMThread = (HANDLE)_beginthread(cm_main, 0, (void*)id);
 }
 
 void create_cmbuffs(
@@ -41,6 +42,7 @@ void create_cmbuffs(
     CMB existing = pcm->pcbuff[id];
     assert(!existing); // no need to create if it already exists: KLJ
     CMB a = (CMB)malloc0(sizeof(cmb));
+
     pcm->pcbuff[id] = pcm->pdbuff[id] = pcm->pebuff[id] = pcm->pfbuff[id] = a;
     a->id = id;
     a->accept = accept;
@@ -127,13 +129,14 @@ PORT void Inbound(int id, int nsamples, double* in) {
     }
 }
 
-void cmdata(int id, double* out) {
+// KLJ: returns < 1 if the thread is to end
+int cmdata(int id, double* out) {
     int first, second;
     CMB a = pcm->pdbuff[id];
     EnterCriticalSection(&a->csOUT);
     if (!_InterlockedAnd(&a->run, 1)) {
         LeaveCriticalSection(&a->csOUT);
-        _endthread();
+        return -1;
     }
     if (a->r1_outsize > (a->r1_active_buffsize - a->r1_outidx)) {
         first = a->r1_active_buffsize - a->r1_outidx;
@@ -147,55 +150,35 @@ void cmdata(int id, double* out) {
     if ((a->r1_outidx += a->r1_outsize) >= a->r1_active_buffsize)
         a->r1_outidx -= a->r1_active_buffsize;
     LeaveCriticalSection(&a->csOUT);
+    return 0;
 }
 #ifdef DEBUG_TIMINGS
 static unsigned int times_ctr = 0;
 #endif
 
 void cm_main(void* pargs) {
+
     HANDLE hpri = prioritise_thread_max();
+    int id = (int)(ptrdiff_t)pargs;
 
-#pragma warning(disable : 4311)
-    int id = (int)pargs;
-#pragma warning(default : 4311)
     CMB a = pcm->pdbuff[id];
-
-#ifdef DEBUG_TIMINGS
-    if (times_ctr == 0) {
-        a->when_sembuffready = 0;
-    }
-#endif
-
     while (_InterlockedAnd(&a->run, 1)) {
-#ifdef DEBUG_TIMINGS
-        DWORD dwstartwait = timeGetTime();
-#endif
+
         DWORD dwWait = WaitForSingleObject(a->Sem_BuffReady, 500);
         if (dwWait == WAIT_TIMEOUT) {
             continue;
         }
-
-#ifdef DEBUG_TIMINGS
-        DWORD dwendwait = timeGetTime();
-        DWORD took = dwendwait - dwstartwait;
-        if (took > 10 && times_ctr++ > 50) {
-            DWORD how_long_ready = dwendwait - a->when_sembuffready;
-            fprintf(stderr,
-                "cm_main: long time between calls: %ld ms, for id %ld\n",
-                (int)took, id);
-            fprintf(stderr,
-                "cm_main: time since Sem_BuffReady signalled: %ld ms.\n",
-                (int)how_long_ready);
-            fflush(stderr);
+        if (cmdata(id, pcm->in[id]) >= 0) {
+            xcmaster(id);
+        } else {
+            if (hpri) {
+                prioritise_thread_cleanup(hpri);
+            }
+            printf("cm_main, with id: %ld and hCMThread: %p exited.\n", a->id,
+                a->hCMThread);
+            fflush(stdout);
+            a->hCMThread = 0;
         }
-#endif
-
-        cmdata(id, pcm->in[id]);
-        xcmaster(id);
-    }
-
-    if (hpri) {
-        prioritise_thread_cleanup(hpri);
     }
 }
 
@@ -213,7 +196,18 @@ void SetCMRingOutsize(int id, int size) {
             // //
     LeaveCriticalSection(
         &a->csOUT); // let the thread pass to the trap in cmdata()
-    Sleep(2); // wait for the CM thread to die
+
+    // make sure the thread has finished, KLJ
+    int slept = 0;
+    volatile int tid = GetThreadId(a->hCMThread);
+    while (a->hCMThread != 0) {
+        Sleep(1);
+        slept++;
+        if (slept > 2000) break;
+    }
+    //////////////////////////////////////////////////////////////////////////
+    // KLJ this was just Sleep(2)m not actually waiting for the thread to exit
+    // Sleep(2); // wait for the CM thread to die/////////////////////////////
     flush_cmbuffs(id); // restore ring to pristine condition
     a->r1_outsize = size; // set its new outsize
     InterlockedBitTestAndSet(&a->run, 0); // remove the CM thread trap

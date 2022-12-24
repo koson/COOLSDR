@@ -60,7 +60,7 @@
         public static extern void SetIVACvacSize(int id, int size);
 
         [DllImport("ChannelMaster.dll", EntryPoint = "SetIVAChostAPIindex", CallingConvention = CallingConvention.Cdecl)]
-        public static extern void SetIVAChostAPIindex(int id, int index);
+        public static extern int SetIVAChostAPIindex(int id, int index);
 
         [DllImport("ChannelMaster.dll", EntryPoint = "SetIVACExclusive", CallingConvention = CallingConvention.Cdecl)]
         public static extern void SetIVACExclusive(int id, int e);
@@ -69,11 +69,23 @@
         public static extern int GetIVACExclusive(int id);
 
 
+        [DllImport("ChannelMaster.dll", EntryPoint = "GetLastErrorInfo", CallingConvention = CallingConvention.Cdecl)]
+        public static extern IntPtr IntPtr_GetLastErrorInfo();
+
+        public static string IVACGetErrorText()
+        {
+            IntPtr strptr = IntPtr_GetLastErrorInfo();
+            var ret = Marshal.PtrToStringAnsi(strptr);
+            return ret;
+        }
+
+
+
         [DllImport("ChannelMaster.dll", EntryPoint = "SetIVACinputDEVindex", CallingConvention = CallingConvention.Cdecl)]
-        public static extern void SetIVACinputDEVindex(int id, int index);
+        public static extern int SetIVACinputDEVindex(int id, int index);
 
         [DllImport("ChannelMaster.dll", EntryPoint = "SetIVACoutputDEVindex", CallingConvention = CallingConvention.Cdecl)]
-        public static extern void SetIVACoutputDEVindex(int id, int index);
+        public static extern int SetIVACoutputDEVindex(int id, int index);
 
         [DllImport("ChannelMaster.dll", EntryPoint = "SetIVACnumChannels", CallingConvention = CallingConvention.Cdecl)]
         public static extern void SetIVACnumChannels(int id, int n);

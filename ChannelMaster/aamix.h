@@ -35,6 +35,7 @@ warren@wpratt.com
 
 typedef struct _aamix {
     int id; // id of this aamixer
+    volatile HANDLE ThreadHandle;
     volatile int outbound_id; // id to use in the Outbound() call
     volatile long run; // thread runs when set to 1
     volatile long

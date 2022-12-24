@@ -29,6 +29,8 @@ warren@wpratt.com
 
 #include "cmsetup.h"
 #include "cmaster.h"
+extern void CreateP1Handles(void);
+extern void DestroyP1Handles(void);
 
 // set radio structure, call this first
 // these parameters are used by create_cmaster() to determine units to create & buffer sizes
@@ -93,6 +95,7 @@ void CreateRadio()
 	create_cmaster();
 	create_pipe();
 	create_sync();
+	// see create_rnet for handles creation for P1
 }
 
 PORT
@@ -101,6 +104,7 @@ void DestroyRadio()
 	destroy_sync();
 	destroy_pipe();
 	destroy_cmaster();
+    DestroyP1Handles();
 }
 
 // buffer sizes are a function of sample rate to yield constant latency

@@ -168,7 +168,7 @@ namespace CoolSDR.Forms
             Debug.Assert(PAInitTask != null);
             StringBuilder dots = new StringBuilder();
             dots.Append("...");
-            while (!PAInitTask.IsCompleted && !GotClosed)
+            while (PAInitTask != null && !PAInitTask.IsCompleted && !GotClosed)
             {
 
                 Thread.Sleep(15);
@@ -200,7 +200,11 @@ namespace CoolSDR.Forms
         void WaitForStartupTasks()
         {
             WaitForRadio();
-            WaitForPortAudio();
+            if (PAInitTask != null)
+            {
+                WaitForPortAudio();
+            }
+            
             WaitForDisplay();
             if (GotClosed)
             {
@@ -646,13 +650,17 @@ namespace CoolSDR.Forms
 
                 if (!GotClosed)
                 {
-
+                     PortAudioHelper.InitPortAudio();
+                    
+                    /*/
                     Task t = Task.Factory.StartNew(() =>
                     {
                         Thread.CurrentThread.Name = "InitPortAudioThread";
                         PortAudioForCoolSDR.PA_Initialize();
                     });
                     PAInitTask = t;
+                    /*/
+                    
 
                 }
 
@@ -2223,12 +2231,14 @@ namespace CoolSDR.Forms
 
         void DoPowerOn()
         {
-            // radio.SyncDSP(); <-- takes ages. Do we need it?
+            Stopwatch sw = new Stopwatch();
+            sw.Start();
             UpdateDDCs(CurrentRadio.Tuning.rx2_enabled);
             CurrentRadio.Tuning.fwc_dds_freq = 0.0f;
             CurrentRadio.Tuning.rx2_dds_freq = 0.0f;
 
             UpdateVFOASub();
+            
 
             var existing_protocol = NetworkIO.RadioProtocolSaved;
             bool bad_radio = false;
@@ -2257,7 +2267,7 @@ namespace CoolSDR.Forms
             {
                 bad_radio = false;
             }
-
+            
             // switch this back to differentiate between what the user prefers, as saved,
             // rather than what we are using right now.
             NetworkIO.RadioProtocolSaved = existing_protocol;
@@ -2268,31 +2278,45 @@ namespace CoolSDR.Forms
                 SelectMenuTab(TabPages.Radio);
                 return;
             }
+            Debug.Print("B4 start audio: " + sw.ElapsedMilliseconds.ToString());
             if (!StartAudio())
             {
                 chkPower.Checked = false;
             }
             else
             {
+                Debug.Print("After start audio: " + sw.ElapsedMilliseconds.ToString());
                 NetworkIO.SetXVTREnable(0);
                 NetworkIO.SetADC1StepAttenData(0);
                 NetworkIO.SetAlexAtten(0);
                 NetworkIO.SetAntBits(0, 1, 0, false);
 
-                NetworkIO.SetOCBits(0);
+                NetworkIO.SetOCBits(0); 
+
                 this.radio.Tuning.ChangeFrequency(VFO.FreqInMHz);
                 NetworkIO.ATU_Tune(0);
 
+                var t = sw.ElapsedMilliseconds;
                 WDSPStart();
+                var u = sw.ElapsedMilliseconds;
+                Debug.Print("Starting WDSP took: " + (u-t).ToString());
 
                 Debug.Assert(DataFlowing = true);
-                Debug.Assert(CheckSync() > 0);
                 SetMicGain();
-
-
+                bad_radio = CheckSync() != 1;
+                Debug.Print("****DONE ****: " + sw.ElapsedMilliseconds.ToString());
             }
 
-            ShowPoweredUp();
+            if (bad_radio)
+            {
+                chkPower.Checked = false;
+            }
+            else
+            {
+                ShowPoweredUp();
+            }
+
+
         }
 
         void WDSPChangeState(int newState)
@@ -2520,6 +2544,7 @@ namespace CoolSDR.Forms
         internal bool GotClosed { get; set; }
         private void frmMain_FormClosing(object sender, FormClosingEventArgs e)
         {
+            Cursor = Cursors.WaitCursor;
             if (PowerOn)
             {
                 chkPower.Checked = false;

@@ -34,7 +34,7 @@ warren@wpratt.com
 #define MAX_EXT_VACS (16)
 
 typedef struct _ivac {
-    int run;
+    volatile int run;
     int iq_type; // 1 if using raw IQ data; 0 for audio
     int stereo; // 1 for stereo; 0 otherwise
     int iq_rate;
@@ -84,7 +84,10 @@ typedef struct _ivac {
                               // Portaudio works so much better with super-high
                               // thread priority ("Pro Audio")
     volatile int have_set_thread_priority;
+    
 } ivac, *IVAC;
+
+PORT const char* GetLastErrorInfo(void);
 
 void combinebuff(int n, double* a, double* combined);
 void scalebuff(int n, double* in, double k, double* out);
