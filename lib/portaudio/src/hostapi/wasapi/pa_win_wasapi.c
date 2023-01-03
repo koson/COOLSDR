@@ -4014,7 +4014,7 @@ static HRESULT CreateAudioClient(PaWasapiStream* pStream,
     if (FAILED(hr)) {
         (*pa_error) = paInvalidDevice;
         if (output) {
-            LogHostError("When trying to create INPUT device: "
+            LogHostError("When trying to create OUTPUT device: "
                          "CreateAudioClient failed.",
                 hr);
         } else {
