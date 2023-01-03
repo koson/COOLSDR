@@ -33,6 +33,7 @@ warren@wpratt.com
 #include "cmcomm.h"
 #include "pa_win_wasapi.h"
 #include "pa_win_wdmks.h"
+#include "BitDepthConvert.hpp"
 
 volatile int nThreadsMMCount = 0;
 
@@ -96,6 +97,9 @@ PORT void create_ivac(int id, int run,
     a->OUTforce = 0;
     a->OUTfvar = 1.0;
     a->host_api_index = -1;
+    a->convbuf = 0;
+    a->convbuf_size = 0;
+
     create_resamps(a);
     {
         int inrate[2] = {a->audio_rate, a->txmon_rate};
@@ -109,6 +113,10 @@ void destroy_resamps(IVAC a) {
     _aligned_free(a->bitbucket);
     destroy_rmatchV(a->rmatchOUT);
     destroy_rmatchV(a->rmatchIN);
+    if (a->convbuf_size) {
+        a->convbuf_size = 0;
+        free(a->convbuf);
+    }
 }
 
 PORT void destroy_ivac(int id) {
@@ -212,26 +220,49 @@ int make_ivac_thread_max_priority(IVAC a) {
     return 1;
 }
 
+static inline void size_64_bit_buffer(IVAC a, size_t sz_bytes) {
+    // prepare buffer for conversion, if necessary:
+    assert(sz_bytes > 0);
+    size_t tmpsz = sz_bytes * 2; // oversized to avoid re-allocation.
+    if (a->convbuf_size < tmpsz) {
+        if (a->convbuf != 0) {
+            free(a->convbuf);
+            a->convbuf = 0;
+        }
+        a->convbuf = malloc(tmpsz * sizeof(double));
+        a->convbuf_size = tmpsz;
+        memset(a->convbuf, 0, a->convbuf_size);
+    }
+}
+
 int CallbackIVAC(const void* input, void* output, unsigned long frameCount,
-    const PaStreamCallbackTimeInfo* timeInfo, PaStreamCallbackFlags statusFlags,
+    const PaStreamCallbackTimeInfo* ti, PaStreamCallbackFlags f,
     void* userData) {
 
     int id = (int)(ptrdiff_t)userData;
     IVAC a = pvac[id];
-    make_ivac_thread_max_priority(a);
+    const unsigned int dblSz = sizeof(double);
+    const unsigned int fltSz = sizeof(float);
 
-    double* out_ptr = (double*)output;
-    double* in_ptr = (double*)input;
-    (void)timeInfo;
-    (void)statusFlags;
+    if (a->have_set_thread_priority == -1) make_ivac_thread_max_priority(a);
 
+    const size_t floatBufferSize = fltSz * frameCount * a->num_channels;
+    const size_t dblBufferSize = max(a->INringsize, a->OUTringsize);
+    // const size_t det = a->
+    size_64_bit_buffer(a, dblBufferSize);
+
+    float* out_ptr = (float*)output;
+    float* in_ptr = (float*)input;
     if (!a->run) {
-        memset(in_ptr, 0, sizeof(double) * frameCount * a->num_channels);
-        memset(out_ptr, 0, sizeof(double) * frameCount * a->num_channels);
+        memset(in_ptr, 0, floatBufferSize);
+        memset(out_ptr, 0, floatBufferSize);
         return 0;
     }
-    xrmatchIN(a->rmatchIN, in_ptr); // MIC data from VAC
-    xrmatchOUT(a->rmatchOUT, out_ptr); // audio or I-Q data to VAC
+
+    Float32_To_Float64(a->convbuf, 1, in_ptr, 1, frameCount * 2);
+    xrmatchIN(a->rmatchIN, a->convbuf); // MIC data from VAC
+    xrmatchOUT(a->rmatchOUT, (float*)a->convbuf); // audio or I-Q data to VAC
+    Float64_To_Float32(out_ptr, 1, a->convbuf, 1, frameCount * 2);
 
     return 0;
 }
@@ -274,12 +305,12 @@ PORT int StartAudioIVAC(int id) {
     a->inParam.device = in_dev;
     a->inParam.channelCount = 2;
     a->inParam.suggestedLatency = a->pa_in_latency;
-    a->inParam.sampleFormat = paFloat64;
+    a->inParam.sampleFormat = paFloat32;
 
     a->outParam.device = out_dev;
     a->outParam.channelCount = 2;
     a->outParam.suggestedLatency = a->pa_out_latency;
-    a->outParam.sampleFormat = paFloat64;
+    a->outParam.sampleFormat = paFloat32;
 
     /*/
        Pa_OpenStream:

@@ -372,6 +372,7 @@
   <ItemGroup>
     <ClInclude Include="aamix.h" />
     <ClInclude Include="amix.h" />
+    <ClInclude Include="BitDepthConvert.hpp" />
     <ClInclude Include="cmaster.h" />
     <ClInclude Include="cmbuffs.h" />
     <ClInclude Include="cmcomm.h" />

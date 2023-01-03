@@ -204,7 +204,7 @@ namespace CoolSDR.Forms
             {
                 WaitForPortAudio();
             }
-            
+
             WaitForDisplay();
             if (GotClosed)
             {
@@ -650,17 +650,17 @@ namespace CoolSDR.Forms
 
                 if (!GotClosed)
                 {
-                     PortAudioHelper.InitPortAudio();
-                    
-                    /*/
+                    //PortAudioHelper.InitPortAudio();
+
+
                     Task t = Task.Factory.StartNew(() =>
                     {
                         Thread.CurrentThread.Name = "InitPortAudioThread";
                         PortAudioForCoolSDR.PA_Initialize();
                     });
                     PAInitTask = t;
-                    /*/
-                    
+
+
 
                 }
 
@@ -2238,7 +2238,7 @@ namespace CoolSDR.Forms
             CurrentRadio.Tuning.rx2_dds_freq = 0.0f;
 
             UpdateVFOASub();
-            
+
 
             var existing_protocol = NetworkIO.RadioProtocolSaved;
             bool bad_radio = false;
@@ -2267,7 +2267,7 @@ namespace CoolSDR.Forms
             {
                 bad_radio = false;
             }
-            
+
             // switch this back to differentiate between what the user prefers, as saved,
             // rather than what we are using right now.
             NetworkIO.RadioProtocolSaved = existing_protocol;
@@ -2291,7 +2291,7 @@ namespace CoolSDR.Forms
                 NetworkIO.SetAlexAtten(0);
                 NetworkIO.SetAntBits(0, 1, 0, false);
 
-                NetworkIO.SetOCBits(0); 
+                NetworkIO.SetOCBits(0);
 
                 this.radio.Tuning.ChangeFrequency(VFO.FreqInMHz);
                 NetworkIO.ATU_Tune(0);
@@ -2299,7 +2299,7 @@ namespace CoolSDR.Forms
                 var t = sw.ElapsedMilliseconds;
                 WDSPStart();
                 var u = sw.ElapsedMilliseconds;
-                Debug.Print("Starting WDSP took: " + (u-t).ToString());
+                Debug.Print("Starting WDSP took: " + (u - t).ToString());
 
                 Debug.Assert(DataFlowing = true);
                 SetMicGain();

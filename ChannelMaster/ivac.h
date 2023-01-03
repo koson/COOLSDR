@@ -84,7 +84,9 @@ typedef struct _ivac {
                               // Portaudio works so much better with super-high
                               // thread priority ("Pro Audio")
     volatile int have_set_thread_priority;
-    
+    double* convbuf;
+    size_t convbuf_size;
+
 } ivac, *IVAC;
 
 PORT const char* GetLastErrorInfo(void);

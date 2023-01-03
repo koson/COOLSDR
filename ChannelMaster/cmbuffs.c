@@ -205,7 +205,7 @@ void SetCMRingOutsize(int id, int size) {
         Sleep(1);
         slept++;
         tid_local = GetThreadId(a->hCMThread);
-        if (tid_local == 0 || (LONG_PTR)tid_local == INVALID_HANDLE_VALUE) {
+        if (tid_local == 0 || (HANDLE)tid_local == INVALID_HANDLE_VALUE) {
             if (a->hCMThread) {
                 assert(0);
                 // break;

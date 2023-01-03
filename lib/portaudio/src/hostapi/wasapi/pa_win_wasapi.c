@@ -3850,14 +3850,18 @@ static HRESULT CreateAudioClient(PaWasapiStream* pStream,
     _CalculatePeriodicity(pSub, output, &eventPeriodicity);
 
     // Open the stream and associate it with an audio session
-    /*/
+
     hr = IAudioClient_Initialize(audioClient, pSub->shareMode,
         pSub->streamFlags, pSub->period, eventPeriodicity, &pSub->wavex.Format,
         NULL);
-    /*/
 
-    hr = IAudioClient_Initialize(audioClient, AUDCLNT_SHAREMODE_SHARED,
-        pSub->streamFlags, 0, 0, &pSub->wavex, 0);
+    if (FAILED(hr) && pSub->shareMode != AUDCLNT_SHAREMODE_SHARED
+        && pSub->streamFlags == AUDCLNT_STREAMFLAGS_LOOPBACK) {
+        LogHostError("Loopback devices must not be created in exclusive "
+                     "mode. Please adjust your settings, and try again.",
+            hr);
+        return hr;
+    }
 
     // [Output only] Check if buffer size is the one we requested in Exclusive
     // mode, for UAC1 USB DACs WASAPI can allocate internal buffer equal to 8
@@ -3959,21 +3963,30 @@ static HRESULT CreateAudioClient(PaWasapiStream* pStream,
             pSub->streamFlags, pSub->period, eventPeriodicity,
             &pSub->wavex.Format, NULL);
 
+        if (FAILED(hr) && pSub->shareMode != AUDCLNT_SHAREMODE_SHARED
+            && pSub->streamFlags == AUDCLNT_STREAMFLAGS_LOOPBACK) {
+            LogHostError("Loopback devices must not be created in exclusive "
+                         "mode. Please adjust your settings, and try again.",
+                hr);
+            return hr;
+        }
+
         /*/
         hr = IAudioClient_Initialize(audioClient, AUDCLNT_SHAREMODE_SHARED,
             AUDCLNT_STREAMFLAGS_LOOPBACK, 0, 0, &pSub->wavex.Format, 0);
             /*/
     }
 
-    /*! WASAPI buffer size or alignment failure. Fallback to using default size
-     * and alignment.
+    /*! WASAPI buffer size or alignment failure. Fallback to using default
+     * size and alignment.
      */
     if ((hr == AUDCLNT_E_BUFFER_SIZE_ERROR)
         || (hr == AUDCLNT_E_BUFFER_SIZE_NOT_ALIGNED)) {
         // Use default
         pSub->period = pInfo->DefaultDevicePeriod;
 
-        PRINT(("WASAPI: CreateAudioClient: correcting buffer size/alignment to "
+        PRINT(("WASAPI: CreateAudioClient: correcting buffer "
+               "size/alignment to "
                "device default\n"));
 
         // Release the previous allocations
@@ -3987,8 +4000,8 @@ static HRESULT CreateAudioClient(PaWasapiStream* pStream,
             goto done;
         }
 
-        // Set device scheduling period (always 0 in Shared mode according to
-        // Microsoft docs)
+        // Set device scheduling period (always 0 in Shared mode according
+        // to Microsoft docs)
         _CalculatePeriodicity(pSub, output, &eventPeriodicity);
 
         // Open the stream and associate it with an audio session
@@ -4001,12 +4014,12 @@ static HRESULT CreateAudioClient(PaWasapiStream* pStream,
     if (FAILED(hr)) {
         (*pa_error) = paInvalidDevice;
         if (output) {
-            LogHostError(
-                "When trying to create INPUT device: CreateAudioClient failed.",
+            LogHostError("When trying to create INPUT device: "
+                         "CreateAudioClient failed.",
                 hr);
         } else {
-            LogHostError(
-                "When trying to create INPUT device: CreateAudioClient failed.",
+            LogHostError("When trying to create INPUT device: "
+                         "CreateAudioClient failed.",
                 hr);
         }
         goto done;
@@ -4135,8 +4148,8 @@ static PaError ActivateAudioClientInput(PaWasapiStream* stream) {
     // Correct buffer to max size if it maxed out result of GetBufferSize
     stream->in.bufferSize = maxBufferSize;
 
-    // Get interface latency (actually unneeded as we calculate latency from the
-    // size of maxBufferSize).
+    // Get interface latency (actually unneeded as we calculate latency from
+    // the size of maxBufferSize).
     if (FAILED(hr = IAudioClient_GetStreamLatency(
                    stream->in.clientParent, &stream->in.deviceLatency))) {
         LogHostError("GetStreamLatency", hr);
@@ -4144,7 +4157,8 @@ static PaError ActivateAudioClientInput(PaWasapiStream* stream) {
             "input: cannot get stream latency", result = paInvalidDevice);
         goto error;
     }
-    // stream->in.latencySeconds = nano100ToSeconds(stream->in.deviceLatency);
+    // stream->in.latencySeconds =
+    // nano100ToSeconds(stream->in.deviceLatency);
 
     // Number of frames that are required at each period
     stream->in.framesPerHostCallback = maxBufferSize;
@@ -4163,7 +4177,8 @@ static PaError ActivateAudioClientInput(PaWasapiStream* stream) {
     // GetStreamLatency notes)
     stream->in.latencySeconds = bufferLatency;
 
-    PRINT(("WASAPI::OpenStream(input): framesPerUser[ %d ] framesPerHost[ %d ] "
+    PRINT(("WASAPI::OpenStream(input): framesPerUser[ %d ] framesPerHost[ %d "
+           "] "
            "latency[ %.02fms ] exclusive[ %s ] wow64_fix[ %s ] mode[ %s ]\n",
         (UINT32)framesPerBuffer, (UINT32)stream->in.framesPerHostCallback,
         (float)(stream->in.latencySeconds * 1000.0f),
@@ -4310,8 +4325,8 @@ static PaError OpenStream(struct PaUtilHostApiRepresentation* hostApi,
             && (inputStreamInfo->flags & paWinWasapiPolling))
             stream->in.streamFlags = 0; // polling interface
         else if (fullDuplex)
-            stream->in.streamFlags = 0; // polling interface is implemented for
-                                        // full-duplex mode also
+            stream->in.streamFlags = 0; // polling interface is implemented
+                                        // for full-duplex mode also
 
         // Use built-in PCM converter (channel count and sample rate) if
         // requested
@@ -4354,8 +4369,8 @@ static PaError OpenStream(struct PaUtilHostApiRepresentation* hostApi,
             stream->hostProcessOverrideInput.userData = userData;
         }
 
-        // Only get IAudioCaptureClient input once here instead of getting it at
-        // multiple places based on the use
+        // Only get IAudioCaptureClient input once here instead of getting
+        // it at multiple places based on the use
         if (FAILED(hr = IAudioClient_GetService(stream->in.clientParent,
                        &pa_IID_IAudioCaptureClient,
                        (void**)&stream->captureClientParent))) {
@@ -4365,9 +4380,9 @@ static PaError OpenStream(struct PaUtilHostApiRepresentation* hostApi,
             goto error;
         }
 
-        // Create ring buffer for blocking mode (It is needed because we fetch
-        // Input packets, not frames, and thus we have to save partial packet if
-        // such remains unread)
+        // Create ring buffer for blocking mode (It is needed because we
+        // fetch Input packets, not frames, and thus we have to save partial
+        // packet if such remains unread)
         if (stream->in.params.blocking == TRUE) {
             UINT32 bufferFrames
                 = ALIGN_NEXT_POW2((stream->in.framesPerHostCallback
@@ -4469,8 +4484,8 @@ static PaError OpenStream(struct PaUtilHostApiRepresentation* hostApi,
             && (outputStreamInfo->flags & paWinWasapiPolling))
             stream->out.streamFlags = 0; // polling interface
         else if (fullDuplex)
-            stream->out.streamFlags = 0; // polling interface is implemented for
-                                         // full-duplex mode also
+            stream->out.streamFlags = 0; // polling interface is implemented
+                                         // for full-duplex mode also
 
         // Use built-in PCM converter (channel count and sample rate) if
         // requested
@@ -4508,8 +4523,8 @@ static PaError OpenStream(struct PaUtilHostApiRepresentation* hostApi,
             stream->hostProcessOverrideOutput.userData = userData;
         }
 
-        // Only get IAudioCaptureClient output once here instead of getting it
-        // at multiple places based on the use
+        // Only get IAudioCaptureClient output once here instead of getting
+        // it at multiple places based on the use
         if (FAILED(hr = IAudioClient_GetService(stream->out.clientParent,
                        &pa_IID_IAudioRenderClient,
                        (void**)&stream->renderClientParent))) {
@@ -4568,14 +4583,14 @@ static PaError OpenStream(struct PaUtilHostApiRepresentation* hostApi,
             goto error;
         }*/
 
-        // serious problem #2 - No, Not a problem, as framesPerHostCallback take
-        // into account sample size while it is not a problem for PA
+        // serious problem #2 - No, Not a problem, as framesPerHostCallback
+        // take into account sample size while it is not a problem for PA
         // full-duplex, we must care of period only!
         /*if (stream->out.framesPerHostCallback !=
         stream->in.framesPerHostCallback)
         {
-            PRINT(("WASAPI: OpenStream: framesPerHostCallback discrepancy\n"));
-            goto error;
+            PRINT(("WASAPI: OpenStream: framesPerHostCallback
+        discrepancy\n")); goto error;
         }*/
     }
 
@@ -4584,13 +4599,14 @@ static PaError OpenStream(struct PaUtilHostApiRepresentation* hostApi,
                                               : stream->in.framesPerBuffer);
 
     // Choose correct mode of buffer processing:
-    // Exclusive/Shared non paWinWasapiPolling mode: paUtilFixedHostBufferSize -
-    // always fixed Exclusive/Shared paWinWasapiPolling mode:
-    // paUtilBoundedHostBufferSize - may vary for Exclusive or Full-duplex
+    // Exclusive/Shared non paWinWasapiPolling mode:
+    // paUtilFixedHostBufferSize - always fixed Exclusive/Shared
+    // paWinWasapiPolling mode: paUtilBoundedHostBufferSize - may vary for
+    // Exclusive or Full-duplex
     bufferMode = paUtilFixedHostBufferSize;
-    if (inputParameters) // !!! WASAPI IAudioCaptureClient::GetBuffer extracts
-                         // not number of frames but 1 packet, thus we always
-                         // must adapt
+    if (inputParameters) // !!! WASAPI IAudioCaptureClient::GetBuffer
+                         // extracts not number of frames but 1 packet, thus
+                         // we always must adapt
         bufferMode = paUtilBoundedHostBufferSize;
     else if (outputParameters) {
         if ((stream->out.buffers == 1)
@@ -4878,8 +4894,8 @@ static PaError StartStream(PaStream* s) {
 
     PaUtil_ResetBufferProcessor(&stream->bufferProcessor);
 
-    // Cleanup handles (may be necessary if stream was stopped by itself due to
-    // error)
+    // Cleanup handles (may be necessary if stream was stopped by itself due
+    // to error)
     _StreamCleanup(stream);
 
     // Create close event
@@ -4936,8 +4952,8 @@ static PaError StartStream(PaStream* s) {
             goto nonblocking_start_error;
         }
     } else {
-        // Create blocking operation events (non-signaled event means - blocking
-        // operation is pending)
+        // Create blocking operation events (non-signaled event means -
+        // blocking operation is pending)
         if (stream->out.clientParent != NULL) {
             if ((stream->hBlockingOpStreamWR
                     = CreateEvent(NULL, TRUE, TRUE, NULL))
@@ -5105,9 +5121,9 @@ static PaError ReadStream(PaStream* s, void* _buffer, unsigned long frames) {
     // Notify blocking op has begun
     ResetEvent(stream->hBlockingOpStreamRD);
 
-    // Use thread scheduling for 500 microseconds (emulated) when wait time for
-    // frames is less than 1 milliseconds, emulation helps to normalize CPU
-    // consumption and avoids too busy waiting
+    // Use thread scheduling for 500 microseconds (emulated) when wait time
+    // for frames is less than 1 milliseconds, emulation helps to normalize
+    // CPU consumption and avoids too busy waiting
     ThreadIdleScheduler_Setup(&sched, 1, 250 /* microseconds */);
 
     // Make a local copy of the user buffer pointer(s), this is necessary
@@ -5122,7 +5138,8 @@ static PaError ReadStream(PaStream* s, void* _buffer, unsigned long frames) {
             ((BYTE**)user_buffer)[i] = ((BYTE**)_buffer)[i];
     }
 
-    // Find out if there are tail frames, flush them all before reading hardware
+    // Find out if there are tail frames, flush them all before reading
+    // hardware
     if ((available = PaUtil_GetRingBufferReadAvailable(stream->in.tailBuffer))
         != 0) {
         ring_buffer_size_t buf1_size = 0, buf2_size = 0, read, desired;
@@ -5174,9 +5191,9 @@ static PaError ReadStream(PaStream* s, void* _buffer, unsigned long frames) {
         if (CheckForStopOrWait(stream, sleep)) break;
 
         // Get available frames (must be finding out available frames before
-        // call to IAudioCaptureClient_GetBuffer othervise audio glitches will
-        // occur inExclusive mode as it seems that WASAPI has some scheduling/
-        // processing problems when such busy polling with
+        // call to IAudioCaptureClient_GetBuffer othervise audio glitches
+        // will occur inExclusive mode as it seems that WASAPI has some
+        // scheduling/ processing problems when such busy polling with
         // IAudioCaptureClient_GetBuffer occurs)
         if ((hr = _PollGetInputFramesAvailable(stream, &available)) != S_OK) {
             LogHostError("", hr);
@@ -5186,8 +5203,8 @@ static PaError ReadStream(PaStream* s, void* _buffer, unsigned long frames) {
         // Wait for more frames to become available
         if (available == 0) {
             // Exclusive mode may require latency of 1 millisecond, thus we
-            // shall sleep around 500 microseconds (emulated) to collect packets
-            // in time
+            // shall sleep around 500 microseconds (emulated) to collect
+            // packets in time
             if (stream->in.shareMode != AUDCLNT_SHAREMODE_EXCLUSIVE) {
                 UINT32 sleep_frames = (frames < stream->in.framesPerHostCallback
                         ? frames
@@ -5285,9 +5302,9 @@ static PaError WriteStream(
     // Notify blocking op has begun
     ResetEvent(stream->hBlockingOpStreamWR);
 
-    // Use thread scheduling for 500 microseconds (emulated) when wait time for
-    // frames is less than 1 milliseconds, emulation helps to normalize CPU
-    // consumption and avoids too busy waiting
+    // Use thread scheduling for 500 microseconds (emulated) when wait time
+    // for frames is less than 1 milliseconds, emulation helps to normalize
+    // CPU consumption and avoids too busy waiting
     ThreadIdleScheduler_Setup(&sched, 1, 500 /* microseconds */);
 
     // Make a local copy of the user buffer pointer(s), this is necessary
@@ -5355,8 +5372,9 @@ static PaError WriteStream(
         PaUtil_SetInterleavedOutputChannels(&stream->bufferProcessor, 0,
             wasapi_buffer, stream->bufferProcessor.outputChannelCount);
 
-        // Copy user data to host buffer (with conversion if applicable), this
-        // call will advance pointer 'user_buffer' to consumed portion of data
+        // Copy user data to host buffer (with conversion if applicable),
+        // this call will advance pointer 'user_buffer' to consumed portion
+        // of data
         processed = PaUtil_CopyOutput(
             &stream->bufferProcessor, (const void**)&user_buffer, frames);
         frames -= processed;
@@ -5477,32 +5495,34 @@ static void WaspiHostProcessingLoop(void* inputBuffer, long inputFrames,
     PaUtil_BeginBufferProcessing(&stream->bufferProcessor, &timeInfo, flags);
 
     /*
-        depending on whether the host buffers are interleaved, non-interleaved
-        or a mixture, you will want to call PaUtil_SetInterleaved*Channels(),
-        PaUtil_SetNonInterleaved*Channel() or PaUtil_Set*Channel() here.
+        depending on whether the host buffers are interleaved,
+       non-interleaved or a mixture, you will want to call
+       PaUtil_SetInterleaved*Channels(), PaUtil_SetNonInterleaved*Channel()
+       or PaUtil_Set*Channel() here.
     */
 
     if (stream->bufferProcessor.inputChannelCount > 0) {
         PaUtil_SetInputFrameCount(&stream->bufferProcessor, inputFrames);
         PaUtil_SetInterleavedInputChannels(&stream->bufferProcessor,
             0, /* first channel of inputBuffer is channel 0 */
-            inputBuffer,
-            0); /* 0 - use inputChannelCount passed to init buffer processor */
+            inputBuffer, 0); /* 0 - use inputChannelCount passed to init
+                                buffer processor */
     }
 
     if (stream->bufferProcessor.outputChannelCount > 0) {
         PaUtil_SetOutputFrameCount(&stream->bufferProcessor, outputFrames);
         PaUtil_SetInterleavedOutputChannels(&stream->bufferProcessor,
             0, /* first channel of outputBuffer is channel 0 */
-            outputBuffer,
-            0); /* 0 - use outputChannelCount passed to init buffer processor */
+            outputBuffer, 0); /* 0 - use outputChannelCount passed to init
+                                 buffer processor */
     }
 
     /* you must pass a valid value of callback result to
        PaUtil_EndBufferProcessing() in general you would pass paContinue for
-       normal operation, and paComplete to drain the buffer processor's internal
-       output buffer. You can check whether the buffer processor's output buffer
-       is empty using PaUtil_IsBufferProcessorOuputEmpty( bufferProcessor )
+       normal operation, and paComplete to drain the buffer processor's
+       internal output buffer. You can check whether the buffer processor's
+       output buffer is empty using PaUtil_IsBufferProcessorOuputEmpty(
+       bufferProcessor )
     */
     callbackResult = paContinue;
     framesProcessed
@@ -5542,8 +5562,8 @@ static PaError MMCSS_activate(
         return paUnanticipatedHostError;
     }
 
-    /*BOOL priority_ok = pAvSetMmThreadPriority(hTask, AVRT_PRIORITY_NORMAL);
-    if (priority_ok == FALSE)
+    /*BOOL priority_ok = pAvSetMmThreadPriority(hTask,
+    AVRT_PRIORITY_NORMAL); if (priority_ok == FALSE)
     {
         PRINT(("WASAPI: AvSetMmThreadPriority failed!\n"));
     }*/
@@ -5593,8 +5613,8 @@ PaError PaWasapi_ThreadPriorityBoost(
                 == FALSE)
                 return paUnanticipatedHostError;
 
-            // Memorize prev priority (pretend to be non NULL pointer by adding
-            // 0x80000000 mask)
+            // Memorize prev priority (pretend to be non NULL pointer by
+            // adding 0x80000000 mask)
             task = (HANDLE)(priority_prev | 0x80000000);
 
             ret = paNoError;
@@ -6262,8 +6282,8 @@ PA_THREAD_FUNC ProcThreadEvent(void* param) {
     if (!PrepareComPointers(stream, &threadComInitialized))
         return (UINT32)paUnanticipatedHostError;
 
-    // Request fine (1 ms) granularity of the system timer functions for precise
-    // operation of waitable timers
+    // Request fine (1 ms) granularity of the system timer functions for
+    // precise operation of waitable timers
     SystemTimer_SetGranularity(&timer, 1);
 
     // Waiting on all events in case of Full-Duplex/Exclusive mode.
@@ -6357,21 +6377,21 @@ PA_THREAD_FUNC ProcThreadEvent(void* param) {
 
     // Processing Loop
     for (;;) {
-        // 10 sec timeout (on timeout stream will auto-stop when processed by
-        // WAIT_TIMEOUT case)
+        // 10 sec timeout (on timeout stream will auto-stop when processed
+        // by WAIT_TIMEOUT case)
         dwResult = WaitForMultipleObjects(
             S_COUNT, stream->event, waitAllEvents, 10 * 1000);
 
-        // Check for close event (after wait for buffers to avoid any calls to
-        // user callback when hCloseRequest was set)
+        // Check for close event (after wait for buffers to avoid any calls
+        // to user callback when hCloseRequest was set)
         if (CheckForStop(stream)) break;
 
         // Process S_INPUT/S_OUTPUT
         switch (dwResult) {
             case WAIT_TIMEOUT: {
-                PRINT(
-                    ("WASAPI Thread: WAIT_TIMEOUT - probably bad audio driver "
-                     "or Vista x64 bug: use paWinWasapiPolling instead\n"));
+                PRINT(("WASAPI Thread: WAIT_TIMEOUT - probably bad audio "
+                       "driver "
+                       "or Vista x64 bug: use paWinWasapiPolling instead\n"));
                 goto thread_end;
                 break;
             }
@@ -6443,9 +6463,10 @@ static UINT32 GetSleepTime(PaWasapiStream* stream, UINT32 sleepTimeIn,
     UINT32 sleepTime;
 
     // According to the issue
-    // [https://github.com/PortAudio/portaudio/issues/303] glitches may occur
-    // when user frames equal to 1/2 of the host buffer frames, therefore the
-    // empirical workaround for this problem is to lower the sleep time by 2
+    // [https://github.com/PortAudio/portaudio/issues/303] glitches may
+    // occur when user frames equal to 1/2 of the host buffer frames,
+    // therefore the empirical workaround for this problem is to lower the
+    // sleep time by 2
     if (userFramesOut != 0) {
         UINT32 chunks = stream->out.framesPerHostCallback / userFramesOut;
         if (chunks <= 2) {
@@ -6474,8 +6495,9 @@ static UINT32 ConfigureLoopSleepTimeAndScheduler(
         = stream->in.framesPerHostCallback / WASAPI_PACKETS_PER_INPUT_BUFFER;
     UINT32 userFramesOut = stream->out.framesPerBuffer;
 
-    // Adjust polling time for non-paUtilFixedHostBufferSize, input stream is
-    // not adjustable as it is being polled according to its packet length
+    // Adjust polling time for non-paUtilFixedHostBufferSize, input stream
+    // is not adjustable as it is being polled according to its packet
+    // length
     if (stream->bufferMode != paUtilFixedHostBufferSize) {
         userFramesOut = (stream->bufferProcessor.framesPerUserBuffer
                 ? stream->bufferProcessor.framesPerUserBuffer
@@ -6488,14 +6510,15 @@ static UINT32 ConfigureLoopSleepTimeAndScheduler(
     sleepTimeOut = GetFramesSleepTime(
         userFramesOut, stream->out.wavex.Format.nSamplesPerSec);
 
-    // WASAPI input packets tend to expire very easily, let's limit sleep time
-    // to 2 milliseconds for all cases. Please propose better solution if any
+    // WASAPI input packets tend to expire very easily, let's limit sleep
+    // time to 2 milliseconds for all cases. Please propose better solution
+    // if any
     if (sleepTimeIn > 2) sleepTimeIn = 2;
 
     sleepTime = GetSleepTime(stream, sleepTimeIn, sleepTimeOut, userFramesOut);
 
-    // Make sure not 0, othervise use ThreadIdleScheduler to bounce between [0,
-    // 1] ms to avoid too busy loop
+    // Make sure not 0, othervise use ThreadIdleScheduler to bounce between
+    // [0, 1] ms to avoid too busy loop
     if (sleepTime == 0) {
         sleepTimeIn = GetFramesSleepTimeMicroseconds(
             userFramesIn, stream->in.wavex.Format.nSamplesPerSec);
@@ -6526,11 +6549,11 @@ static inline INT32 GetNextSleepTime(SystemTimer* timer,
     else
         nextSleepTime = sleepTime;
 
-    // Adjust next sleep time dynamically depending on how much time was spent
-    // in ProcessOutputBuffer/ProcessInputBuffer therefore periodicity will not
-    // jitter or be increased for the amount of time spent in processing;
-    // example when sleepTime is 10 ms where [] is polling time slot, {}
-    // processing time slot:
+    // Adjust next sleep time dynamically depending on how much time was
+    // spent in ProcessOutputBuffer/ProcessInputBuffer therefore periodicity
+    // will not jitter or be increased for the amount of time spent in
+    // processing; example when sleepTime is 10 ms where [] is polling time
+    // slot, {} processing time slot:
     //
     // [9],{2},[8],{1},[9],{1},[9],{3},[7],{2},[8],{3},[7],{2},[8],{2},[8],{3},[7],{2},[8],...
     //
@@ -6578,7 +6601,8 @@ PA_THREAD_FUNC ProcThreadPoll(void* param) {
     // guarantee correct logic around WaitForSingleObject
     SystemTimer_SetGranularity(&timer, 1);
 
-    // Calculate sleep time of the processing loop (inside WaitForSingleObject)
+    // Calculate sleep time of the processing loop (inside
+    // WaitForSingleObject)
     sleepTime = ConfigureLoopSleepTimeAndScheduler(stream, &scheduler);
 
     // Setup data processors
@@ -6614,8 +6638,8 @@ PA_THREAD_FUNC ProcThreadPoll(void* param) {
     // Initialize event & start OUTPUT stream
     if (stream->out.clientProc) {
         // Preload buffer (obligatory, othervise ->Start() will fail), avoid
-        // processing when in full-duplex mode as it requires input processing
-        // as well
+        // processing when in full-duplex mode as it requires input
+        // processing as well
         if (!PA_WASAPI__IS_FULLDUPLEX(stream)) {
             UINT32 frames = 0;
             if ((hr = _PollGetOutputFramesAvailable(stream, &frames)) == S_OK) {
@@ -6636,15 +6660,16 @@ PA_THREAD_FUNC ProcThreadPoll(void* param) {
                         frames -= stream->out.framesPerBuffer;
                     }
                 } else {
-                    // Some devices may not start (will get stuck with 0 ready
-                    // frames) if data not prefetched
+                    // Some devices may not start (will get stuck with 0
+                    // ready frames) if data not prefetched
                     if (frames == 0) frames = stream->out.framesPerBuffer;
 
-                    // USB DACs report large buffer in Exclusive mode and if it
-                    // is filled fully will stuck in non playing state, e.g.
-                    // IAudioClient_GetCurrentPadding() will start reporting max
-                    // buffer size constantly, thus preload data size equal to
-                    // the user buffer to allow process going
+                    // USB DACs report large buffer in Exclusive mode and if
+                    // it is filled fully will stuck in non playing state,
+                    // e.g. IAudioClient_GetCurrentPadding() will start
+                    // reporting max buffer size constantly, thus preload
+                    // data size equal to the user buffer to allow process
+                    // going
                     if ((stream->out.shareMode == AUDCLNT_SHAREMODE_EXCLUSIVE)
                         && (frames >= (stream->out.framesPerBuffer * 2)))
                         frames -= stream->out.framesPerBuffer;
@@ -6720,12 +6745,13 @@ PA_THREAD_FUNC ProcThreadPoll(void* param) {
                         if (stream->bufferMode == paUtilFixedHostBufferSize) {
                             UINT32 framesProc = stream->out.framesPerBuffer;
 
-                            // If we got less frames avoid sleeping again as it
-                            // might be the corner case and buffer has
+                            // If we got less frames avoid sleeping again as
+                            // it might be the corner case and buffer has
                             // sufficient number of frames now, in case
-                            // 'out.framesPerBuffer' is 1/2 of the host buffer
-                            // sleeping again may cause underruns. Do short busy
-                            // waiting (normally might take 1-2 iterations)
+                            // 'out.framesPerBuffer' is 1/2 of the host
+                            // buffer sleeping again may cause underruns. Do
+                            // short busy waiting (normally might take 1-2
+                            // iterations)
                             if (framesAvail < framesProc) {
                                 nextSleepTime = 0;
                                 continue;
@@ -6898,8 +6924,8 @@ PA_THREAD_FUNC ProcThreadPoll(void* param) {
                     } else {
                         if (stream->out.shareMode != AUDCLNT_SHAREMODE_SHARED)
                             LogHostError(
-                                "ProcThreadPoll", hr); // be silent in shared
-                                                       // mode, try
+                                "ProcThreadPoll", hr); // be silent in
+                                                       // shared mode, try
                         // again next time
                     }
                 } else {
