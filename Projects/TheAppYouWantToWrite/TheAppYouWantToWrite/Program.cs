@@ -40,9 +40,10 @@ namespace TheAppYouWantToWrite
     }
     public interface IVFO
     {
-        public abstract VFOID ID { get; set; }
-        public abstract double Freq { get; set; }
-        public abstract string ToString();
+        public  VFOID ID { get; set; }
+        public  double Freq { get; set; }
+        public  string ToString();
+        public bool Active { get; set; }
 
     }
 
@@ -54,9 +55,13 @@ namespace TheAppYouWantToWrite
         }
         public double Freq { get; set; } = 1.933;
         public VFOID ID { get; set; }
+        public bool Active { get; set; }
+
         public override string ToString()
         {
-            return "VFO " + ID.ToString() + " has freq:\t" + Freq;
+            var ret = "VFO " + ID.ToString() + " has freq:\t" + Freq;
+            ret += Active ? " and is active" : " and is not active";
+            return ret;
         }
     }
 
@@ -140,6 +145,7 @@ namespace TheAppYouWantToWrite
             VFOs.Add(VfoB);
             VfoA.Freq = 1.933;
             VfoB.Freq = 3.615;
+            VfoA.Active = true; VfoB.Active = false;
             connection = new Connection();
             connection.Connect(ip);
         }
