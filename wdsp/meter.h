@@ -32,7 +32,7 @@ warren@wpratt.com
 #ifndef _meter_h
 #define _meter_h
 
-typedef struct _meter {
+typedef struct _meter { //-V802
     int run;
     int* prun;
     int size;

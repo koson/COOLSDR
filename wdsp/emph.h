@@ -39,7 +39,7 @@ warren@wpratt.com
 #ifndef _emphp_h
 #define _emphp_h
 #include "firmin.h"
-typedef struct _emphp {
+typedef struct _emphp { //-V802
     int run;
     int position;
     int size;

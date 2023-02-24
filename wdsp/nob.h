@@ -32,7 +32,7 @@ warren@wpratt.com
 #ifndef _anb_h
 #define _anb_h
 
-typedef struct _anb {
+typedef struct _anb { //-V802
     int run;
     int buffsize; // size of input/output buffer
     double* in; // input buffer

@@ -34,7 +34,7 @@ warren@wpratt.com
 
 #define WSDEL 1025 // number of supported whole sample delays
 
-typedef struct _delay {
+typedef struct _delay { //-V802
     int run; // run
     int size; // number of input samples per buffer
     double* in; // input buffer

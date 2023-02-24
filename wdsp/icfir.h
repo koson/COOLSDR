@@ -32,7 +32,7 @@ warren@pratt.one
 #ifndef _icfir_h
 #define _icfir_h
 #include "firmin.h"
-typedef struct _icfir {
+typedef struct _icfir { //-V802
     int run;
     int size;
     int nc;

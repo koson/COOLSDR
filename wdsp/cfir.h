@@ -32,7 +32,7 @@ warren@wpratt.com
 #ifndef _cfir_h
 #define _cfir_h
 #include "firmin.h"
-typedef struct _cfir {
+typedef struct _cfir { //-V802
     int run;
     int size;
     int nc;

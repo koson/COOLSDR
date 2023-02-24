@@ -133,7 +133,7 @@ static inline void show_windows_error(const char* where, DWORD e) {
 #endif
 }
 
-extern volatile  int nThreadsMMCount;
+extern volatile int nThreadsMMCount;
 
 static inline HANDLE prioritise_thread_max() {
 
@@ -154,7 +154,7 @@ static inline HANDLE prioritise_thread_max() {
 
     HANDLE hTask = AvSetMmThreadCharacteristics(TEXT("Pro Audio"), &taskIndex);
     if (hTask == 0) {
-        if (!GetLastError == 1552) {
+        if (GetLastError() != 1552) {
 
             show_windows_error(
                 "hTask returned zero from AvSetMmThreadCharacteristics",
@@ -166,7 +166,7 @@ static inline HANDLE prioritise_thread_max() {
         return 0;
     }
 
-    if (hTask != 0) {
+    if (hTask != 0) { //-V547
 
         ok = AvSetMmThreadPriority(hTask, AVRT_PRIORITY_CRITICAL);
         assert(ok);

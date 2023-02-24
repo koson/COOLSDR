@@ -129,7 +129,7 @@ typedef struct _emnr {
         double** actminbuff;
         int amb_idx;
     } np;
-    struct _npests {
+    struct _npests { //-V802
         int incr;
         double rate;
         int msize;

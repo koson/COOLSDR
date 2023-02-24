@@ -230,8 +230,10 @@ static inline void size_64_bit_buffer(IVAC a, size_t sz_bytes) {
             a->convbuf = 0;
         }
         a->convbuf = malloc(tmpsz * sizeof(double));
-        a->convbuf_size = tmpsz;
-        memset(a->convbuf, 0, a->convbuf_size);
+        if (a->convbuf) {
+            a->convbuf_size = tmpsz;
+            memset(a->convbuf, 0, a->convbuf_size);
+        }
     }
 }
 
@@ -261,7 +263,7 @@ int CallbackIVAC(const void* input, void* output, unsigned long frameCount,
 
     Float32_To_Float64(a->convbuf, 1, in_ptr, 1, frameCount * 2);
     xrmatchIN(a->rmatchIN, a->convbuf); // MIC data from VAC
-    xrmatchOUT(a->rmatchOUT, (float*)a->convbuf); // audio or I-Q data to VAC
+    xrmatchOUT(a->rmatchOUT, a->convbuf); // audio or I-Q data to VAC
     Float64_To_Float32(out_ptr, 1, a->convbuf, 1, frameCount * 2);
 
     return 0;
@@ -334,8 +336,8 @@ PORT int StartAudioIVAC(int id) {
         w.size = sizeof(PaWasapiStreamInfo);
         w.version = 1;
 
-        a->inParam.hostApiSpecificStreamInfo = &w;
-        a->outParam.hostApiSpecificStreamInfo = &w;
+        a->inParam.hostApiSpecificStreamInfo = &w; //-V506
+        a->outParam.hostApiSpecificStreamInfo = &w; //-V506
 
     } else if (hinf->type == paWDMKS) {
 
@@ -343,8 +345,8 @@ PORT int StartAudioIVAC(int id) {
         x.hostApiType = paWDMKS;
         x.size = sizeof(PaWinWDMKSInfo);
         x.flags = paWinWDMKSOverrideFramesize;
-        a->inParam.hostApiSpecificStreamInfo = &x;
-        a->outParam.hostApiSpecificStreamInfo = &x;
+        a->inParam.hostApiSpecificStreamInfo = &x; //-V506
+        a->outParam.hostApiSpecificStreamInfo = &x; //-V506
 
     } else {
         a->inParam.hostApiSpecificStreamInfo = NULL;
@@ -569,7 +571,7 @@ PORT void SetIVACnumChannels(int id, int n) {
 PORT void SetIVACInLatency(int id, double lat, int reset) {
     IVAC a = pvac[id];
 
-    if (a->in_latency != lat) {
+    if (a->in_latency != lat) { //-V550
         a->in_latency = lat;
         destroy_resamps(a);
         create_resamps(a);
@@ -579,7 +581,7 @@ PORT void SetIVACInLatency(int id, double lat, int reset) {
 PORT void SetIVACOutLatency(int id, double lat, int reset) {
     IVAC a = pvac[id];
 
-    if (a->out_latency != lat) {
+    if (a->out_latency != lat) { //-V550
         a->out_latency = lat;
         destroy_resamps(a);
         create_resamps(a);
@@ -589,7 +591,7 @@ PORT void SetIVACOutLatency(int id, double lat, int reset) {
 PORT void SetIVACPAInLatency(int id, double lat, int reset) {
     IVAC a = pvac[id];
 
-    if (a->pa_in_latency != lat) {
+    if (a->pa_in_latency != lat) { //-V550
         a->pa_in_latency = lat;
     }
 }

@@ -62,7 +62,7 @@ typedef struct _calcc {
     int* info;
     int* binfo;
     double txdel;
-    struct _ctrl {
+    struct _ctrl { //-V802
         double moxdelay;
         double loopdelay;
         int state;

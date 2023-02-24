@@ -109,7 +109,7 @@ extern void setSize_snba(SNBA a, int size);
 __declspec(dllexport) void SetRXASNBAOutputBandwidth(
     int channel, double flow, double fhigh);
 
-typedef struct _bpsnba {
+typedef struct _bpsnba { //-V802
     int run; // run the filter
     int run_notches; // use the notches, vs straight bandpass
     int position; // position in the processing pipeline

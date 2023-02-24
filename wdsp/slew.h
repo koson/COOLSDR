@@ -32,7 +32,7 @@ warren@wpratt.com
 #ifndef _slew_h
 #define _slew_h
 
-typedef struct _uslew {
+typedef struct _uslew { //-V802
     int channel;
     volatile long* ch_upslew;
     int size;

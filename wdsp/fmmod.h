@@ -32,7 +32,7 @@ warren@wpratt.com
 #ifndef _fmmod_h
 #define _fmmod_h
 #include "firmin.h"
-typedef struct _fmmod {
+typedef struct _fmmod { //-V802
     int run;
     int size;
     double* in;

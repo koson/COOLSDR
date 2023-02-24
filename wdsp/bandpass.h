@@ -100,7 +100,7 @@ extern __declspec(dllexport) void SetTXABPSFreqs(
 #ifndef _bandpass_h
 #define _bandpass_h
 #include "firmin.h"
-typedef struct _bandpass {
+typedef struct _bandpass { //-V802
     int run;
     int position;
     int size;

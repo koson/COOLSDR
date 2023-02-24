@@ -32,7 +32,7 @@ warren@wpratt.com
 #ifndef _div_h
 #define _div_h
 
-typedef struct _div {
+typedef struct _div { //-V802
     int run;
     int nr; // number of receivers to mix
     int size; // size of input/output buffers

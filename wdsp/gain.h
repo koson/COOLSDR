@@ -32,7 +32,7 @@ warren@wpratt.com
 #ifndef _gain_h
 #define _gain_h
 
-typedef struct _gain {
+typedef struct _gain { //-V802
     int run;
     int* prun;
     int size;

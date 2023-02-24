@@ -39,7 +39,7 @@ warren@wpratt.com
 #ifndef _resample_h
 #define _resample_h
 
-typedef struct _resample {
+typedef struct _resample { //-V802
     int run; // run
     int size; // number of input samples per buffer
     double* in; // input buffer for resampler
