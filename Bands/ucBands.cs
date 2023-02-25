@@ -25,10 +25,7 @@ namespace CoolSDR.CustomUserControls
 {
     public partial class ucBands : System.Windows.Forms.UserControl
     {
-        public ucBands()
-        {
-            InitializeComponent();
-        }
+        public ucBands() { InitializeComponent(); }
 
         private void BBTXChanged(object sender, EventArgs e)
         {
@@ -45,9 +42,7 @@ namespace CoolSDR.CustomUserControls
 
                 ShowBands();
             }
-
         }
-
 
         // private bool m_RegionBusy = false;
         private RadioButton m_LastSelRadioButton = null;
@@ -56,8 +51,9 @@ namespace CoolSDR.CustomUserControls
             RadioButton cb = (RadioButton)Sender;
             if (cb == m_LastSelRadioButton && cb.Checked) return;
 
-            var v = MessageBox.Show("Changing region resets the bands to the defaults. Are you sure you want to continue?",
-                        App.Name, MessageBoxButtons.YesNo, MessageBoxIcon.Question);
+            var v = MessageBox.Show(
+                "Changing region resets the bands to the defaults. Are you sure you want to continue?",
+                App.Name, MessageBoxButtons.YesNo, MessageBoxIcon.Question);
 
             if (v != DialogResult.Yes)
             {
@@ -88,22 +84,24 @@ namespace CoolSDR.CustomUserControls
                 return;
             }
 
-
-
             Debug.Assert(false); // how'd we ever get here?
-
         }
 
         public void Init()
         {
             m_Initting = true;
-            Bands = new CoolSDR.BandsTypes.BandsCollection(App.GetDataFolder(), "BandsCollection");
+            Bands = new CoolSDR.BandsTypes.BandsCollection(
+                App.GetDataFolder(), "BandsCollection");
             var r = Bands.CurrentRegion;
             switch (r)
             {
                 case IARURegion.Europe: m_LastSelRadioButton = radRegionEU; break;
-                case IARURegion.Americas: m_LastSelRadioButton = radRegionAmerica; break;
-                case IARURegion.AsiaAndPacific: m_LastSelRadioButton = radRegionPacific; break;
+                case IARURegion.Americas:
+                    m_LastSelRadioButton = radRegionAmerica;
+                    break;
+                case IARURegion.AsiaAndPacific:
+                    m_LastSelRadioButton = radRegionPacific;
+                    break;
                 default: m_LastSelRadioButton = null; break;
             }
 
@@ -111,8 +109,6 @@ namespace CoolSDR.CustomUserControls
             cboWhich.SelectedIndexChanged += CboWhich_SelectedIndexChanged;
 
             m_Initting = false;
-
-
         }
 
         private void CboWhich_SelectedIndexChanged(object sender, EventArgs e)
@@ -170,7 +166,6 @@ namespace CoolSDR.CustomUserControls
                     btnAll.Click += this.BtnSelAll;
                     btnNone.Click += this.BtnSelAll;
                 }
-
             }
         }
 
@@ -178,7 +173,6 @@ namespace CoolSDR.CustomUserControls
         {
             BandsBase b = (BandsBase)tv.Tag;
             PopBands(tv, b);
-
         }
 
         private bool PoppingBands { get; set; }
@@ -229,18 +223,13 @@ namespace CoolSDR.CustomUserControls
             }
             catch (Exception ex)
             {
-                Thetis.Common.LogException(ex, m_bShownTVCheckError == false, "Error on Tv_AfterCheck");
+                Thetis.Common.LogException(
+                    ex, m_bShownTVCheckError == false, "Error on Tv_AfterCheck");
                 m_bShownTVCheckError = true;
             }
-
         }
 
-
-
-
         private bool m_Initting;
-
-
 
         private void BtnSelAll(object sender, EventArgs e)
         {
@@ -271,7 +260,6 @@ namespace CoolSDR.CustomUserControls
             {
                 this.Cursor = Cursors.Default;
             }
-
         }
 
         private void SetAllChecked(TreeView tv, bool val)
@@ -316,7 +304,6 @@ namespace CoolSDR.CustomUserControls
                 Bands.UserBands.Save();
             }
             /*/
-
         }
 
         private void btnAdd_Click(object sender, EventArgs e)
@@ -327,12 +314,15 @@ namespace CoolSDR.CustomUserControls
             }
             var b = GetSelectedBand(tv.SelectedNode);
             b.State = EditBandState.Create_New_MainBand;
-            b.ParentBand = new BandsTypes.NamedBands.CustomBand(FrmBandEdit.DefaultText, 1.8, 2.0, Modes.ModeKind.All, true);
+            // b.ParentBand = new
+            // BandsTypes.NamedBands.CustomBand(FrmBandEdit.DefaultText, 1.8, 2.0,
+            // Modes.ModeKind.All, true);
             m_frmEdit.ShowForm(b);
             var be = m_frmEdit;
             if (m_frmEdit.OK)
             {
-                var nb = new BandsTypes.NamedBands.CustomBand(be.BandName, be.BandLo, be.BandHi, Modes.ModeKind.All, be.BandTx);
+                var nb = new BandsTypes.NamedBands.CustomBand(be.BandName,
+                    be.BandLo, be.BandHi, Modes.ModeKind.All, be.BandTx);
 
                 if (cboWhich.SelectedIndex >= 1)
                 {
@@ -346,9 +336,7 @@ namespace CoolSDR.CustomUserControls
                 }
                 this.PopBands(this.tv, (BandsBase)tv.Tag);
                 tv.SelectedNode = tv.Nodes[0];
-
             }
-
         }
 
         private void btnAddSub_Click(object sender, EventArgs e)
@@ -359,7 +347,8 @@ namespace CoolSDR.CustomUserControls
             }
             catch (Exception ex)
             {
-                Thetis.Common.LogException(ex, true, "Error when Add Sub-Band Button Pressed");
+                Thetis.Common.LogException(
+                    ex, true, "Error when Add Sub-Band Button Pressed");
             }
         }
 
@@ -379,9 +368,11 @@ namespace CoolSDR.CustomUserControls
                 if (b != null)
                 {
 
-                    var sb = new CustomBand(FrmBandEdit.DefaultText, b.ParentBand.MinFreq, b.ParentBand.MaxFreq,
+                    var sb = new CustomBand(FrmBandEdit.DefaultText,
+                        b.ParentBand.MinFreq, b.ParentBand.MaxFreq,
                         Modes.ModeKind.All, b.ParentBand.TXAllowed);
-                    BandWithSub bws = new BandWithSub(b.ParentBand, sb, b.Collection, true);
+                    BandWithSub bws
+                        = new BandWithSub(b.ParentBand, sb, b.Collection, true);
                     bws.State = EditBandState.Create_new_SubBand;
                     if (m_frmEdit == null)
                     {
@@ -396,14 +387,8 @@ namespace CoolSDR.CustomUserControls
                         b.Collection.Save();
                         ReloadAll();
                     }
-
                 }
-
-
-
             }
-
-
         }
 
         private void btnEdit_Click(object sender, EventArgs e)
@@ -419,7 +404,8 @@ namespace CoolSDR.CustomUserControls
             }
             catch (Exception ex)
             {
-                Thetis.Common.LogException(ex, true, "Error when Edit Button Pressed");
+                Thetis.Common.LogException(
+                    ex, true, "Error when Edit Button Pressed");
             }
         }
 
@@ -432,12 +418,14 @@ namespace CoolSDR.CustomUserControls
                 m_frmEdit = new FrmBandEdit(Thetis.Common.console);
             }
             var state = b.State;
-            bool editParent = state == EditBandState.Create_New_MainBand || state == EditBandState.Edit_MainBand;
+            bool editParent = state == EditBandState.Create_New_MainBand
+                || state == EditBandState.Edit_MainBand;
             if (!editParent)
             {
                 if (b.SubBand == null)
                 {
-                    b.SubBand = new CustomBand(FrmBandEdit.DefaultText, 1.800, 1.840, Modes.ModeKind.All, true);
+                    b.SubBand = new CustomBand(FrmBandEdit.DefaultText, 1.800,
+                        1.840, Modes.ModeKind.All, true);
                 }
             }
 
@@ -454,7 +442,6 @@ namespace CoolSDR.CustomUserControls
                             b.ParentBand.AddSubBand(bl);
                         }
                         b.NewSubBands = new List<BandLimits>();
-
                     }
                     UpdateBandFromFrmEdit(b.ParentBand, m_frmEdit);
                     b.Collection.Save();
@@ -478,7 +465,6 @@ namespace CoolSDR.CustomUserControls
             b.MinFreq = f.BandLo;
             b.Channelised = f.BandChannelised;
             b.AllowedModes = f.BandModes;
-
         }
 
         public enum EditBandState
@@ -498,7 +484,8 @@ namespace CoolSDR.CustomUserControls
             public List<BandLimits> NewSubBands = new List<BandLimits>();
             public bool ParentSelected { get; private set; }
             public EditBandState State { get; set; }
-            public BandWithSub(BandLimits blParent, BandLimits blSub, BandsBase collection, bool parentSelected)
+            public BandWithSub(BandLimits blParent, BandLimits blSub,
+                BandsBase collection, bool parentSelected)
             {
                 ParentSelected = parentSelected;
                 ParentBand = blParent;
@@ -526,9 +513,7 @@ namespace CoolSDR.CustomUserControls
                 selIndex = tv.SelectedNode.Index;
             }
             Debug.Assert(selIndex >= 0);
-            if (node == null)
-                node = tv.SelectedNode;
-
+            if (node == null) node = tv.SelectedNode;
 
             if (node.Parent == null)
             {
@@ -544,7 +529,6 @@ namespace CoolSDR.CustomUserControls
                 BandLimits parentBand = bb.Bands[nde.Index];
                 BandLimits subBand = parentBand.SubBands[node.Index];
                 return new BandWithSub(parentBand, subBand, bb, false);
-
             }
         }
 
@@ -565,16 +549,20 @@ namespace CoolSDR.CustomUserControls
             }
             catch (Exception ex)
             {
-                Thetis.Common.LogException(ex, true, "Error when trying to delete band or sub-band");
+                Thetis.Common.LogException(
+                    ex, true, "Error when trying to delete band or sub-band");
             }
         }
         void RemoveSelected()
         {
             bool removed = false;
             var b = GetSelectedBand(tv.SelectedNode);
+            if (b.Collection == null) return;
             if (b.ParentSelected)
             {
-                var a = MessageBox.Show("Really delete band " + b.ParentBand.UniqueName + " and all the sub-bands it contains?\n\nAre you sure? You cannot undo this action!",
+                var a = MessageBox.Show("Really delete band "
+                        + b.ParentBand.UniqueName
+                        + " and all the sub-bands it contains?\n\nAre you sure? You cannot undo this action!",
                     App.Name, MessageBoxButtons.YesNo, MessageBoxIcon.Question);
                 if (a == DialogResult.Yes)
                 {
@@ -582,27 +570,29 @@ namespace CoolSDR.CustomUserControls
                     bool ret = b.Collection.RemoveBand(b.ParentBand);
                     if (!ret)
                     {
-                        Thetis.Common.LogString("Failed to remove band " + b.ParentBand.UniqueName, true);
+                        Thetis.Common.LogString(
+                            "Failed to remove band " + b.ParentBand.UniqueName,
+                            true);
                     }
-
                 }
             }
             else
             {
-                var a = MessageBox.Show("Really delete band " + b.SubBand.UniqueName + " in the band " + b.ParentBand.UniqueName
-                    + "?\n\nAre you sure? You cannot undo this action!",
-                        App.Name, MessageBoxButtons.YesNo, MessageBoxIcon.Question);
+                var a = MessageBox.Show("Really delete band " + b.SubBand.UniqueName
+                        + " in the band " + b.ParentBand.UniqueName
+                        + "?\n\nAre you sure? You cannot undo this action!",
+                    App.Name, MessageBoxButtons.YesNo, MessageBoxIcon.Question);
                 if (a == DialogResult.Yes)
                 {
                     bool ret = b.ParentBand.SubBands.Remove(b.SubBand);
                     removed = true;
                     if (!ret)
                     {
-                        Thetis.Common.LogString("Failed to remove band " + b.ParentBand.UniqueName, true);
+                        Thetis.Common.LogString(
+                            "Failed to remove band " + b.ParentBand.UniqueName,
+                            true);
                     }
-
                 }
-
             }
 
             if (removed)
@@ -619,8 +609,8 @@ namespace CoolSDR.CustomUserControls
             int was_sel_node_index = was_sel_node.Index;
             int idx = nd.Index;
             ShowBands();
-            if (nd != null)
-                tv.SelectedNode = tv.Nodes[idx];
+            if (tv.Nodes.Count == 0) return;
+            if (nd != null) tv.SelectedNode = tv.Nodes[idx];
             var bb = GetSelectedBand(tv.SelectedNode);
             if (bb.ParentBand.SubBands.Count > 0)
             {
@@ -631,26 +621,34 @@ namespace CoolSDR.CustomUserControls
                 }
                 else
                 {
-                    tv.SelectedNode = tv.SelectedNode.Nodes[tv.SelectedNode.Nodes.Count - 1];
+                    tv.SelectedNode
+                        = tv.SelectedNode.Nodes[tv.SelectedNode.Nodes.Count - 1];
                 }
             }
         }
 
         private void btnDefaults_Click(object sender, EventArgs e)
         {
-            var a = MessageBox.Show("Really reset all to defaults?\n\nYou will lose all and any bands or sub-bands you have saved.",
-               App.Name, MessageBoxButtons.YesNo, MessageBoxIcon.Question, MessageBoxDefaultButton.Button2);
+            var a = MessageBox.Show(
+                "Really reset all to defaults?\n\nYou will lose all and any bands or sub-bands you have saved.",
+                App.Name, MessageBoxButtons.YesNo, MessageBoxIcon.Question,
+                MessageBoxDefaultButton.Button2);
             if (a == DialogResult.Yes)
             {
                 var old_reg = CurrentRegion;
                 switch (old_reg)
                 {
-                    case IARURegion.Americas: CurrentRegion = IARURegion.Europe; break;
-                    case IARURegion.Europe: CurrentRegion = IARURegion.Americas; break;
-                    default:
-                        CurrentRegion = IARURegion.Europe; break;
+                    case IARURegion.Americas:
+                        CurrentRegion = IARURegion.Europe;
+                        break;
+                    case IARURegion.Europe:
+                        CurrentRegion = IARURegion.Americas;
+                        break;
+                    default: CurrentRegion = IARURegion.Europe; break;
                 }
                 CurrentRegion = old_reg;
+                cboWhich.SelectedIndex = 0;
+                cboWhich.Refresh();
             }
         }
 

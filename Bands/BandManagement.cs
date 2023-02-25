@@ -23,23 +23,26 @@ using Thetis;
 namespace CoolSDR.BandsTypes
 {
 
-
-
     public abstract class BandsBase : JSONSettingsBase
     {
-        protected override void SerialiserError(StreamingContext context, ErrorContext errorContext)
+        protected override void SerialiserError(
+            StreamingContext context, ErrorContext errorContext)
         {
             Common.LogString("JSON error: " + errorContext.Error.ToString());
-            // 
+            //
             if (Region != IARURegion.None)
             {
                 if (base.HadSettingsToLoad)
                 {
-                    MessageBox.Show("There was an error reading " + this.ID + " settings from file:\n"
-                        + base.FileName + "\n\nand so the defaults will be used here. The old file will be backed up to:\n"
-                        + base.MakeBackup() + "\n\n\nDetails: " + errorContext.Error.Message, App.Name, MessageBoxButton.OK, MessageBoxImage.Error);
+                    MessageBox.Show("There was an error reading " + this.ID
+                            + " settings from file:\n" + base.FileName
+                            + "\n\nand so the defaults will be used here. The old file will be backed up to:\n"
+                            + base.MakeBackup()
+                            + "\n\n\nDetails: " + errorContext.Error.Message,
+                        App.Name, MessageBoxButton.OK, MessageBoxImage.Error);
                 }
-                Common.LogString("This causes us to re-create the bands, for " + this.ID);
+                Common.LogString(
+                    "This causes us to re-create the bands, for " + this.ID);
                 MakeBands(true);
                 errorContext.Handled = true;
             }
@@ -56,17 +59,9 @@ namespace CoolSDR.BandsTypes
             set { SetRegion(value); }
         }
 
-        public bool BroadbandTX
-        {
-            get;
-            set;
-        }
+        public bool BroadbandTX { get; set; }
 
-        public List<BandLimits> Bands
-        {
-            get;
-            set;
-        }
+        public List<BandLimits> Bands { get; set; }
         protected abstract void MakeBands(bool force = false);
         private IARURegion m_Region = IARURegion.None;
 
@@ -76,10 +71,8 @@ namespace CoolSDR.BandsTypes
             set { SetRegion(value); }
         }
 
-        public BandsBase(string folder, string filename, bool loadSettings = false) : base(folder, filename, loadSettings)
-        {
-
-        }
+        public BandsBase(string folder, string filename, bool loadSettings = false)
+            : base(folder, filename, loadSettings) { }
         protected BandsBase() { } // to please JSONSettings
 
         public void SetRegion(IARURegion region, bool forceMakeBands = false)
@@ -91,7 +84,6 @@ namespace CoolSDR.BandsTypes
             m_Region = region;
             if (forceMakeBands) MakeBands(true);
         }
-
 
         [JsonIgnore]
         protected bool Constructed { get; set; }
@@ -106,13 +98,21 @@ namespace CoolSDR.BandsTypes
 
     public class UserDefinedBands : BandsBase
     {
-        [JsonIgnore] public override BandCollectionTypes CollectionType { get => BandCollectionTypes.Custom; }
-        public override string ID { get { return "UserDefinedBands"; } }
+        [JsonIgnore]
+        public override BandCollectionTypes CollectionType
+        {
+            get => BandCollectionTypes.Custom;
+        }
+        public override string ID
+        {
+            get { return "UserDefinedBands"; }
+        }
 
         protected UserDefinedBands() { } // to please json
         ~UserDefinedBands() { }
 
-        public UserDefinedBands(string folder, string filename) : base(folder, filename, false)
+        public UserDefinedBands(string folder, string filename)
+            : base(folder, filename, false)
         {
 
             base.Load();
@@ -144,27 +144,31 @@ namespace CoolSDR.BandsTypes
 
             if (force || Bands == null || Bands.Count == 0)
             {
-                Bands = new List<BandLimits>
-                {
-                    new CustomBand("Another-Example-Echo-Charlie", 6.200, 6.900,Modes.ModeKind.All),
-                    new CustomBand("User-defined WARC 17m", 18.068, 18.168,Modes.ModeKind.All)
-                };
+                Bands = new List<BandLimits> {
+                new CustomBand("Another-Example-Echo-Charlie", 6.200, 6.900,
+                    Modes.ModeKind.All),
+                new CustomBand(
+                    "User-defined WARC 17m", 18.068, 18.168, Modes.ModeKind.All)
+            };
             }
-
         }
-
-
-
     }
 
     public class StandardBands : BandsBase
     {
         [JsonIgnore]
-        public override BandCollectionTypes CollectionType { get => BandCollectionTypes.Standard; }
-        public override string ID { get { return "StandardBands"; } }
+        public override BandCollectionTypes CollectionType
+        {
+            get => BandCollectionTypes.Standard;
+        }
+        public override string ID
+        {
+            get { return "StandardBands"; }
+        }
 
         protected StandardBands() { } // to please json
-        public StandardBands(string folder, string filename) : base(folder, filename)
+        public StandardBands(string folder, string filename)
+            : base(folder, filename)
         {
             base.Load();
             if (this.Region == IARURegion.None)
@@ -182,7 +186,6 @@ namespace CoolSDR.BandsTypes
             Constructed = true;
         }
 
-
         protected override void MakeBands(bool force = false)
         {
             MakeStandardBands(Region, force);
@@ -197,31 +200,52 @@ namespace CoolSDR.BandsTypes
             switch (region)
             {
                 case IARURegion.Europe:
-                    col.Add(new CustomBand("UK 60m Bandlet 1", 5258.5,5264, Modes.ModeKind.CW));
-                    col.Add(new CustomBand("UK 60m Bandlet 2", 5.276, 5.284, Modes.ModeKind.USB));
-                    col.Add(new CustomBand("UK 60m Bandlet 3", 5.2885, 5292, Modes.ModeKind.CW));
-                    col.Add(new CustomBand("UK 60m Bandlet 4", 5.298, 5.307, Modes.ModeKind.All));
-                    col.Add(new CustomBand("UK 60m Bandlet 5", 5.313, 5.323, Modes.ModeKind.USB| Modes.ModeKind.AM));
-                    col.Add(new CustomBand("UK 60m Bandlet 6", 5.333, 5.338, Modes.ModeKind.USB));
-                    col.Add(new CustomBand("UK 60m Bandlet 7", 5.354, 5.358, Modes.ModeKind.All));
-                    col.Add(new CustomBand("UK 60m Bandlet 8", 5.362, 5.3745, Modes.ModeKind.All));
-                    col.Add(new CustomBand("UK 60m Bandlet 9", 5.378, 5.382, Modes.ModeKind.USB));
-                    col.Add(new CustomBand("UK 60m Bandlet 10",5.395, 5.401, Modes.ModeKind.USB));
-                    col.Add(new CustomBand("UK 60m Bandlet 11",5.4035,5.4065, Modes.ModeKind.USB));
+                    col.Add(new CustomBand(
+                        "UK 60m Bandlet 1", 5258.5, 5264, Modes.ModeKind.CW));
+                    col.Add(new CustomBand(
+                        "UK 60m Bandlet 2", 5.276, 5.284, Modes.ModeKind.USB));
+                    col.Add(new CustomBand(
+                        "UK 60m Bandlet 3", 5.2885, 5292, Modes.ModeKind.CW));
+                    col.Add(new CustomBand(
+                        "UK 60m Bandlet 4", 5.298, 5.307, Modes.ModeKind.All));
+                    col.Add(new CustomBand("UK 60m Bandlet 5", 5.313, 5.323,
+                        Modes.ModeKind.USB | Modes.ModeKind.AM));
+                    col.Add(new CustomBand(
+                        "UK 60m Bandlet 6", 5.333, 5.338, Modes.ModeKind.USB));
+                    col.Add(new CustomBand(
+                        "UK 60m Bandlet 7", 5.354, 5.358, Modes.ModeKind.All));
+                    col.Add(new CustomBand(
+                        "UK 60m Bandlet 8", 5.362, 5.3745, Modes.ModeKind.All));
+                    col.Add(new CustomBand(
+                        "UK 60m Bandlet 9", 5.378, 5.382, Modes.ModeKind.USB));
+                    col.Add(new CustomBand(
+                        "UK 60m Bandlet 10", 5.395, 5.401, Modes.ModeKind.USB));
+                    col.Add(new CustomBand(
+                        "UK 60m Bandlet 11", 5.4035, 5.4065, Modes.ModeKind.USB));
                     break;
                 case IARURegion.Americas:
-                    col.Add(new CustomBand(5.3320, "60m Bandlet 1", 2800, Modes.ModeKind.All));
-                    col.Add(new CustomBand(5.3480, "60m Bandlet 2", 2800, Modes.ModeKind.All));
-                    col.Add(new CustomBand(5.3585, "60m Bandlet 3", 2800, Modes.ModeKind.All));
-                    col.Add(new CustomBand(5.3730, "60m Bandlet 4", 2800, Modes.ModeKind.All));
-                    col.Add(new CustomBand(5.4050, "60m Bandlet 5", 2800, Modes.ModeKind.All));
+                    col.Add(new CustomBand(
+                        5.3320, "60m Bandlet 1", 2800, Modes.ModeKind.All));
+                    col.Add(new CustomBand(
+                        5.3480, "60m Bandlet 2", 2800, Modes.ModeKind.All));
+                    col.Add(new CustomBand(
+                        5.3585, "60m Bandlet 3", 2800, Modes.ModeKind.All));
+                    col.Add(new CustomBand(
+                        5.3730, "60m Bandlet 4", 2800, Modes.ModeKind.All));
+                    col.Add(new CustomBand(
+                        5.4050, "60m Bandlet 5", 2800, Modes.ModeKind.All));
                     break;
                 default:
-                    col.Add(new CustomBand(5.3320, "60m Bandlet 1", 2800, Modes.ModeKind.All));
-                    col.Add(new CustomBand(5.3480, "60m Bandlet 2", 2800, Modes.ModeKind.All));
-                    col.Add(new CustomBand(5.3585, "60m Bandlet 3", 2800, Modes.ModeKind.All));
-                    col.Add(new CustomBand(5.3730, "60m Bandlet 4", 2800, Modes.ModeKind.All));
-                    col.Add(new CustomBand(5.4050, "60m Bandlet 5", 2800, Modes.ModeKind.All));
+                    col.Add(new CustomBand(
+                        5.3320, "60m Bandlet 1", 2800, Modes.ModeKind.All));
+                    col.Add(new CustomBand(
+                        5.3480, "60m Bandlet 2", 2800, Modes.ModeKind.All));
+                    col.Add(new CustomBand(
+                        5.3585, "60m Bandlet 3", 2800, Modes.ModeKind.All));
+                    col.Add(new CustomBand(
+                        5.3730, "60m Bandlet 4", 2800, Modes.ModeKind.All));
+                    col.Add(new CustomBand(
+                        5.4050, "60m Bandlet 5", 2800, Modes.ModeKind.All));
                     break;
             }
         }
@@ -251,17 +275,11 @@ namespace CoolSDR.BandsTypes
                         Bands.Add(new NamedBands.Six(region));
                     Bands.Add(new NamedBands.Four(region));
                 };
-
             }
             return;
         }
 
-
-        public BandLimits CurrentBand
-        {
-            get;
-            set;
-        }
+        public BandLimits CurrentBand { get; set; }
     }
 
     public enum BandCollectionTypes
@@ -269,36 +287,38 @@ namespace CoolSDR.BandsTypes
         Standard = 0,
         Custom = 1,
     }
-    public  class BandsCollection : JSONSettingsBase
+    public class BandsCollection : JSONSettingsBase
     {
 
-
         protected BandsCollection() { }
-        public BandsCollection(string folder, string filename) : base(folder, filename, false)
+        public BandsCollection(string folder, string filename)
+            : base(folder, filename, false)
         {
 
             base.Load();
 
-
             try
             {
                 m_HamBands = new StandardBands(folder, filename + "Standard");
             }
             catch (Exception ex)
             {
-                Common.LogException(ex, true, "Error when loading Standard BandsCollection from file means we load the defaults");
+                Common.LogException(ex, true,
+                    "Error when loading Standard BandsCollection from file means we load the defaults");
                 m_HamBands = new StandardBands(folder, filename + "Standard");
             }
             try
             {
-                m_UserBands = new UserDefinedBands(folder, filename + "UserDefined");
+                m_UserBands
+                    = new UserDefinedBands(folder, filename + "UserDefined");
 
             }
             catch (Exception ex)
             {
-                Common.LogException(ex, true, "Error when loading User BandsCollection from file means we load the defaults");
-                m_UserBands = new UserDefinedBands(folder, "UserDefined" + filename);
-
+                Common.LogException(ex, true,
+                    "Error when loading User BandsCollection from file means we load the defaults");
+                m_UserBands
+                    = new UserDefinedBands(folder, "UserDefined" + filename);
             }
             if (m_HamBands != null)
             {
@@ -318,7 +338,6 @@ namespace CoolSDR.BandsTypes
                 TDD();
             }
 #endif
-
         }
 
 #if DEBUG
@@ -327,33 +346,36 @@ namespace CoolSDR.BandsTypes
             double f = 1.8;
             if (CurrentRegion == IARURegion.Europe)
             {
-                Debug.Assert(FindBandForFrequency(f) == null);
-                f = 1.810;
-                Debug.Assert(FindBandForFrequency(f) != null);
-                f = 0.648;
-                Debug.Assert(FindBandForFrequency(f) == null);
-                f = 1.908;
-                var b = FindBandForFrequency(f);
-                Debug.Assert(b != null);
-                Debug.Assert(b.UniqueName == "Top Band");
-                Debug.Assert(b.CollectionType == BandCollectionTypes.Standard);
+                var x = FindBandForFrequency(f);
+                if (x != null)
+                {
+                    Debug.Assert(FindBandForFrequency(f) == null);
+                    f = 1.810;
+                    Debug.Assert(FindBandForFrequency(f) != null);
+                    f = 0.648;
+                    Debug.Assert(FindBandForFrequency(f) == null);
+                    f = 1.908;
+                    var b = FindBandForFrequency(f);
+                    Debug.Assert(b != null);
+                    Debug.Assert(b.UniqueName == "Top Band");
+                    Debug.Assert(b.CollectionType == BandCollectionTypes.Standard);
 
-                f = 6.3;
-                b = FindBandForFrequency(f);
-                Debug.Assert(b.CollectionType == BandCollectionTypes.Custom);
-                Debug.Assert(b.UniqueName == "Another-Example-Echo-Charlie");
+                    f = 6.3;
+                    b = FindBandForFrequency(f);
+                    Debug.Assert(b.CollectionType == BandCollectionTypes.Custom);
+                    Debug.Assert(b.UniqueName == "Another-Example-Echo-Charlie");
 
-                f = 5.317;
-                b = FindBandForFrequency(f);
-                BandLimits sub = FindSubBandForFrequency(f, b);
-                Debug.Assert(sub != null);
-
+                    f = 5.317;
+                    b = FindBandForFrequency(f);
+                    BandLimits sub = FindSubBandForFrequency(f, b);
+                    Debug.Assert(sub != null);
+                }
             }
         }
 #endif
 
-       public BandLimits FindSubBandForFrequency(double f, BandLimits MainBand)
-       {
+        public BandLimits FindSubBandForFrequency(double f, BandLimits MainBand)
+        {
             if (MainBand.SubBands == null) return null;
             if (MainBand.SubBands.Count == 0) return null;
             foreach (BandLimits bl in MainBand.SubBands)
@@ -375,7 +397,10 @@ namespace CoolSDR.BandsTypes
         [JsonIgnore]
         public StandardBands HamBands { get => m_HamBands; }
         [JsonIgnore]
-        public UserDefinedBands UserBands { get => m_UserBands; }
+        public UserDefinedBands UserBands
+        {
+            get => m_UserBands;
+        }
 
         private bool m_btx;
 
@@ -402,21 +427,20 @@ namespace CoolSDR.BandsTypes
                     m_UserBands.Save();
                 }
 
-                if (m_UserBands != null && m_HamBands != null) // avoid doing it when the settings are loading.
+                if (m_UserBands != null
+                    && m_HamBands
+                        != null) // avoid doing it when the settings are loading.
                     this.Save();
             }
         }
-
 
         IARURegion m_region = IARURegion.Europe;
         public IARURegion CurrentRegion
         {
             get
             {
-                if (m_HamBands == null)
-                    return m_region; // called by json
-                if (m_HamBands != null)
-                    return m_HamBands.CurrentRegion;
+                if (m_HamBands == null) return m_region; // called by json
+                if (m_HamBands != null) return m_HamBands.CurrentRegion;
                 return m_region;
             }
             set
@@ -431,8 +455,7 @@ namespace CoolSDR.BandsTypes
         {
             foreach (BandLimits b in bands)
             {
-                if (f >= b.MinFreq && f <= b.MaxFreq)
-                    return b;
+                if (f >= b.MinFreq && f <= b.MaxFreq) return b;
             }
             return null;
         }

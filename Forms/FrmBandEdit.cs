@@ -32,16 +32,15 @@ namespace CoolSDR.Forms
             MaterialSkinManager.Instance.AddFormToManage(this);
             this.Text = "Edit Band";
             this.ClientSize = new Size(557, 355);
-            this.txtName.BorderFocusColor = mainForm.SkinManager.ColorScheme.AccentColor;
-            this.txtHi.BorderFocusColor = mainForm.SkinManager.ColorScheme.AccentColor;
-            this.txtLo.BorderFocusColor = mainForm.SkinManager.ColorScheme.AccentColor;
-
+            this.txtName.BorderFocusColor
+                = mainForm.SkinManager.ColorScheme.AccentColor;
+            this.txtHi.BorderFocusColor
+                = mainForm.SkinManager.ColorScheme.AccentColor;
+            this.txtLo.BorderFocusColor
+                = mainForm.SkinManager.ColorScheme.AccentColor;
         }
 
-        public string BandNameText
-        {
-            get => this.txtName.Text;
-        }
+        public string BandNameText { get => this.txtName.Text; }
         internal BandWithSub Band { get; private set; }
         public bool BeenShown { get; private set; }
 
@@ -51,30 +50,29 @@ namespace CoolSDR.Forms
 
             this.SubBand = b.SubBand;
             this.Band = b;
-            bool isParentBand = state == EditBandState.Edit_MainBand || state == EditBandState.Create_New_MainBand;
+            bool isParentBand = state == EditBandState.Edit_MainBand
+                || state == EditBandState.Create_New_MainBand;
             if (SubBand == null)
             {
                 Debug.Assert(isParentBand);
                 isParentBand = true;
             }
 
-
-
             if (b.ParentBand == null)
             {
                 this.Text = "Create New Band";
-                Band.ParentBand = new CustomBand(FrmBandEdit.DefaultText, 1.800, 1.900, Modes.ModeKind.All,true);
+                Band.ParentBand = new CustomBand(FrmBandEdit.DefaultText, 1.800,
+                    1.900, Modes.ModeKind.All, true);
                 this.BandModes = Modes.ModeKind.All;
             }
-
-
 
             this.BeenShown = false;
             this.ShowDialog();
             DialogResult result;
             if (!this.OK)
                 result = DialogResult.Cancel;
-            else result = DialogResult.OK;
+            else
+                result = DialogResult.OK;
             return result;
         }
 
@@ -90,18 +88,9 @@ namespace CoolSDR.Forms
             }
         }
 
-        public BandLimits SubBand
-        {
-            get;
-            private set;
-        }
+        public BandLimits SubBand { get; private set; }
 
-        void DoShown()
-        {
-
-            popBand(this.Band);
-
-        }
+        void DoShown() { popBand(this.Band); }
         void popBand(BandWithSub b, bool useNewSubBands = false)
         {
             Debug.Assert(b.ParentBand != null);
@@ -113,8 +102,8 @@ namespace CoolSDR.Forms
             }
 
             var state = b.State;
-            bool editParent = state == EditBandState.Create_New_MainBand || state == EditBandState.Edit_MainBand;
-
+            bool editParent = state == EditBandState.Create_New_MainBand
+                || state == EditBandState.Edit_MainBand;
 
             if (!editParent)
             {
@@ -124,13 +113,14 @@ namespace CoolSDR.Forms
                 this.txtHi.Text = b.ParentBand.MaxFreq.ToString();
                 if (SubBandEdit == null)
                 {
-                    this.Text = "Creating Sub-band within " + b.ParentBand.UniqueName;
+                    this.Text
+                        = "Creating Sub-band within " + b.ParentBand.UniqueName;
                 }
                 else
                 {
-                    this.Text = "Editing Sub-band within " + b.ParentBand.UniqueName;
+                    this.Text
+                        = "Editing Sub-band within " + b.ParentBand.UniqueName;
                     txtName.Text = SubBandEdit.UniqueName;
-  
                 }
                 chkChannels.Visible = false; // only for parent
             }
@@ -154,29 +144,31 @@ namespace CoolSDR.Forms
             chkTX.Checked = bnd.TXAllowed;
             this.BandModes = bnd.AllowedModes;
 
-
             this.txtName.TextBoxControl.SelectionLength = txtName.Text.Length;
             txtName_TextChanged(txtName, EventArgs.Empty); // update the form title
             txtName.Focus();
-
         }
 
         public bool BandChannelised
         {
-            get
-            {
-                return chkChannels.Checked;
-            }
-         }
-        public string BandName { get { return txtName.Text; } }
-        public bool BandTx { get { return chkTX.Checked; } }
+            get { return chkChannels.Checked; }
+        }
+        public string BandName
+        {
+            get { return txtName.Text; }
+        }
+        public bool BandTx
+        {
+            get { return chkTX.Checked; }
+        }
         public double BandLo { get => double.Parse(txtLo.Text); }
         public double BandHi { get => double.Parse(txtHi.Text); }
         public bool OK { get; private set; }
 
         public string ValidateData()
         {
-            if (string.IsNullOrEmpty(BandName)) return "Band Name must not be empty.";
+            if (string.IsNullOrEmpty(BandName))
+                return "Band Name must not be empty.";
             try
             {
 
@@ -214,14 +206,16 @@ namespace CoolSDR.Forms
 
                 var state = this.Band.State;
                 bool editParent = state == EditBandState.Edit_MainBand;
-                if (!editParent)
+                if (editParent)
                 {
                     if (BandLo < Band.ParentBand.MinFreq)
-                        return "Lowest sub-band frequency must not be lower than " + Band.ParentBand.UniqueName + "'s lowest frequency (" +
-                                Band.ParentBand.MinFreq.ToString() + " MHz)";
+                        return "Lowest sub-band frequency must not be lower than "
+                            + Band.ParentBand.UniqueName + "'s lowest frequency ("
+                            + Band.ParentBand.MinFreq.ToString() + " MHz)";
                     if (BandHi > Band.ParentBand.MaxFreq)
-                        return "Highest sub-band frequency must not be higher than " + Band.ParentBand.UniqueName + "'s highest frequency (" +
-                            Band.ParentBand.MaxFreq.ToString() + " MHz)";
+                        return "Highest sub-band frequency must not be higher than "
+                            + Band.ParentBand.UniqueName + "'s highest frequency ("
+                            + Band.ParentBand.MaxFreq.ToString() + " MHz)";
                 }
             }
             catch (Exception ex)
@@ -234,16 +228,19 @@ namespace CoolSDR.Forms
         }
 
         static readonly public string DefaultText = "Type the band name here ...";
-        private int m_ModeShowCount = 0; // hack because closing mode form seems to close US, too!
-        private void FrmBandEdit_FormClosing(object sender, FormClosingEventArgs e)
+        private int m_ModeShowCount
+            = 0; // hack because closing mode form seems to close US, too!
+        private void FrmBandEdit_FormClosing(
+            object sender, FormClosingEventArgs e)
         {
             if (this.OK)
             {
                 var s = ValidateData();
                 if (!string.IsNullOrEmpty(s))
                 {
-                    var a = MessageBox.Show("Bad Input:\n" + s
-                        + "\n\nDo you want to correct it?", App.Name, MessageBoxButtons.YesNo, MessageBoxIcon.Question);
+                    var a = MessageBox.Show(
+                        "Bad Input:\n" + s + "\n\nDo you want to correct it?",
+                        App.Name, MessageBoxButtons.YesNo, MessageBoxIcon.Question);
                     if (a == DialogResult.Yes)
                     {
                         e.Cancel = true;
@@ -262,7 +259,7 @@ namespace CoolSDR.Forms
                     this.Hide();
                     e.Cancel = true;
                 }
-   
+
                 m_ModeShowCount--;
 
             }
@@ -272,10 +269,7 @@ namespace CoolSDR.Forms
             }
             e.Cancel = true;
         }
-        protected override void OnResize(EventArgs e)
-        {
-            base.OnResize(e);
-        }
+        protected override void OnResize(EventArgs e) { base.OnResize(e); }
 
         private void btnOK_Click(object sender, EventArgs e)
         {
@@ -289,12 +283,11 @@ namespace CoolSDR.Forms
             this.Close();
         }
 
-     
-
         private void txtName_TextChanged(object sender, EventArgs e)
         {
             var state = this.Band.State;
-            bool editParent = state == EditBandState.Create_New_MainBand || state == EditBandState.Edit_MainBand;
+            bool editParent = state == EditBandState.Create_New_MainBand
+                || state == EditBandState.Edit_MainBand;
             string name = txtName.Text;
             if (name.StartsWith("Type the "))
             {
@@ -310,11 +303,12 @@ namespace CoolSDR.Forms
             else
             {
 
-
                 if (state == EditBandState.Create_new_SubBand)
-                    this.Text = "Creating Sub-band " + name + " in band: " + this.Band.ParentBand.UniqueName;
+                    this.Text = "Creating Sub-band " + name
+                        + " in band: " + this.Band.ParentBand.UniqueName;
                 else
-                    this.Text = "Editing Sub-band " + name +" in band: " + this.Band.ParentBand.UniqueName;
+                    this.Text = "Editing Sub-band " + name
+                        + " in band: " + this.Band.ParentBand.UniqueName;
             }
         }
 
@@ -325,7 +319,6 @@ namespace CoolSDR.Forms
             if (f.ShowForm(this) == DialogResult.OK)
             {
                 this.BandModes = f.SelectedModes;
-              
             }
             m_ModeShowCount++;
         }
